@@ -49,6 +49,8 @@ class WidgetController extends Controller
     container.style.width = '360px';
     container.style.maxWidth = '92vw';
     container.style.border = '1px solid #e2e8f0';
+    // booreder top 5px solid #0f172a;
+    container.style.borderTop = '5px solid #0f172a';
     container.style.borderRadius = '12px';
     container.style.background = '#fff';
     container.style.boxShadow = '0 12px 32px rgba(0,0,0,0.16)';

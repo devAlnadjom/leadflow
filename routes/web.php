@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LeadController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\WidgetController;
@@ -27,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::resource('leads', LeadController::class);
     Route::get('widgets', [WidgetController::class, 'index'])->name('widgets.index');
     Route::get('widgets/create', [WidgetController::class, 'create'])->name('widgets.create');
     Route::post('widgets', [WidgetController::class, 'store'])->name('widgets.store');
