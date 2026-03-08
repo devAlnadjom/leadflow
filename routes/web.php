@@ -49,6 +49,7 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::get('quotes/{quote}/edit', [\App\Http\Controllers\QuoteController::class, 'edit'])->name('quotes.edit');
     Route::put('quotes/{quote}', [\App\Http\Controllers\QuoteController::class, 'update'])->name('quotes.update');
     Route::delete('quotes/{quote}', [\App\Http\Controllers\QuoteController::class, 'destroy'])->name('quotes.destroy');
+    Route::post('quotes/{quote}/send', [\App\Http\Controllers\QuoteController::class, 'sendEmail'])->name('quotes.send');
 
     Route::get('widgets', [WidgetController::class, 'index'])->name('widgets.index');
     Route::get('widgets/create', [WidgetController::class, 'create'])->name('widgets.create');

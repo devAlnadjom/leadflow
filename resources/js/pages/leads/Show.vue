@@ -9,7 +9,6 @@ import {
     XCircle, 
     Mail, 
     Phone, 
-    Calendar,
     MapPin,
     Briefcase,
     MessageSquare,
@@ -19,7 +18,8 @@ import {
     Trash2,
     MoreHorizontal,
     Plus,
-    UserCircle2
+    UserCircle2,
+    Check
 } from 'lucide-vue-next';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
@@ -48,10 +48,11 @@ type LeadPayload = {
     status: string;
     value: number;
     payload: Record<string, unknown>;
-    created_at: string | null;
     updated_at: string | null;
     notes?: Array<{
         id: number;
+        content: string;
+        type: 'note' | 'call' | 'email' | 'meeting';
         author: string;
         created_at: string;
     }>;
@@ -121,13 +122,17 @@ const dynamicPayloadFields = computed(() => {
 });
 
 const noteForm = useForm({
-    content: ''
+    content: '',
+    type: 'note' as 'note' | 'call' | 'email' | 'meeting'
 });
 
 const submitNote = () => {
     noteForm.post(`/leads/${props.lead.id}/notes`, {
         preserveScroll: true,
-        onSuccess: () => noteForm.reset('content'),
+        onSuccess: () => {
+            noteForm.reset('content');
+            // Keep the selected type for convenience, or reset it: noteForm.reset('content', 'type')
+        },
     });
 };
 
@@ -138,6 +143,82 @@ const deleteNote = (noteId: number) => {
         });
     }
 };
+
+const activities = computed(() => {
+    let events = [];
+
+    if (props.lead.created_at) {
+        events.push({
+            id: 'created',
+            title: 'Nouveau lead généré',
+            description: `Reçu depuis le formulaire "${props.lead.lead_form_name}"`,
+            date: props.lead.created_at,
+            icon: Inbox,
+            color: 'text-emerald-600',
+            bg: 'bg-emerald-100',
+            border: 'border-emerald-200'
+        });
+    }
+
+    if (props.lead.notes) {
+        props.lead.notes.forEach(note => {
+            let icon = MessageSquare;
+            let title = 'Note interne ajoutée';
+            let color = 'text-amber-600';
+            let bg = 'bg-amber-100';
+            let border = 'border-amber-200';
+
+            if (note.type === 'call') {
+                icon = Phone;
+                title = 'Appel consigné';
+                color = 'text-blue-600';
+                bg = 'bg-blue-100';
+                border = 'border-blue-200';
+            } else if (note.type === 'email') {
+                icon = Mail;
+                title = 'Email consigné';
+                color = 'text-cyan-600';
+                bg = 'bg-cyan-100';
+                border = 'border-cyan-200';
+            } else if (note.type === 'meeting') {
+                icon = Calendar;
+                title = 'Rendez-vous consigné';
+                color = 'text-purple-600';
+                bg = 'bg-purple-100';
+                border = 'border-purple-200';
+            }
+
+            events.push({
+                id: `note-${note.id}`,
+                title: title,
+                description: `Par ${note.author}: "${note.content.substring(0, 50)}${note.content.length > 50 ? '...' : ''}"`,
+                date: note.created_at,
+                icon: icon,
+                color: color,
+                bg: bg,
+                border: border
+            });
+        });
+    }
+
+    if (props.lead.quotes) {
+        props.lead.quotes.forEach(quote => {
+            events.push({
+                id: `quote-${quote.id}`,
+                title: 'Nouveau devis créé',
+                description: `Devis N°${quote.quote_number} estimé à ${quote.total}$`,
+                date: quote.created_at,
+                icon: FileText,
+                color: 'text-indigo-600',
+                bg: 'bg-indigo-100',
+                border: 'border-indigo-200'
+            });
+        });
+    }
+
+    // Sort descending by date
+    return events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+});
 </script>
 
 <template>
@@ -303,18 +384,33 @@ const deleteNote = (noteId: number) => {
                         </TabsList>
 
                         <TabsContent value="details" class="focus-visible:outline-none focus-visible:ring-0 mt-0">
-                            <div class="bg-white border text-center p-12 rounded-xl shadow-sm border-dashed">
-                                <div class="w-16 h-16 mx-auto bg-indigo-50 text-indigo-500 flex items-center justify-center rounded-full mb-4">
-                                    <Activity class="w-8 h-8" />
+                            <div class="bg-white border rounded-xl shadow-sm overflow-hidden border-slate-200">
+                                <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex align-center justify-between">
+                                    <h3 class="font-semibold text-slate-800 flex items-center gap-2">
+                                        <Activity class="w-4 h-4 text-indigo-500" /> Historique d'Activité
+                                    </h3>
+                                    <Badge variant="outline" class="font-normal bg-white text-slate-500 border-slate-200">{{ activities.length }} événements</Badge>
                                 </div>
-                                <h3 class="text-lg font-semibold text-slate-900 mb-2">Historique d'Activité</h3>
-                                <p class="text-slate-500 mb-6 max-w-sm mx-auto">
-                                    Bientôt, vous pourrez voir ici l'historique complet des intéractions, appels, courriels et changements de statuts pour ce lead.
-                                </p>
-                                <Button variant="outline" class="gap-2 mx-auto">
-                                    <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                                    En développement
-                                </Button>
+                                <div class="p-6">
+                                    <div class="relative border-l-2 border-slate-100 ml-3 md:ml-4 space-y-8 pb-4 mt-2">
+                                        <div v-for="activity in activities" :key="activity.id" class="relative pl-6 md:pl-8 group">
+                                            <!-- Timeline Dot -->
+                                            <div class="absolute -left-[17px] top-1 w-8 h-8 rounded-full border-2 border-white flex items-center justify-center shrink-0 z-10 shadow-sm transition-transform group-hover:scale-110" :class="[activity.bg, activity.border, activity.color]">
+                                                <component :is="activity.icon" class="w-4 h-4" />
+                                            </div>
+                                            <!-- Content -->
+                                            <div class="bg-slate-50/50 rounded-xl p-4 border border-slate-100 shadow-sm hover:border-slate-200 hover:bg-slate-50 transition-colors">
+                                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4 mb-2">
+                                                    <h4 class="font-bold text-slate-800 text-sm">{{ activity.title }}</h4>
+                                                    <span class="text-xs font-semibold text-slate-400 flex items-center gap-1.5 shrink-0">
+                                                        <Clock class="w-3.5 h-3.5" /> {{ new Date(activity.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) }}
+                                                    </span>
+                                                </div>
+                                                <p class="text-sm text-slate-600">{{ activity.description }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </TabsContent>
 
@@ -370,15 +466,51 @@ const deleteNote = (noteId: number) => {
                         <TabsContent value="notes" class="focus-visible:outline-none focus-visible:ring-0 mt-0">
                             <!-- New Note Form -->
                             <div class="bg-white border rounded-xl shadow-sm mb-6 p-5">
-                                <h3 class="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
-                                    <MessageSquare class="w-4 h-4 text-amber-500" /> Ajouter une note
+                                <h3 class="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                                    <MessageSquare class="w-4 h-4 text-amber-500" /> Ajouter une activité ou une note
                                 </h3>
                                 <form @submit.prevent="submitNote">
+                                    <!-- Type Selection Widgets -->
+                                    <div class="flex flex-wrap gap-2 mb-4">
+                                        <button 
+                                            type="button" 
+                                            @click="noteForm.type = 'note'"
+                                            class="px-4 py-2 rounded-lg text-sm font-medium border transition-colors flex items-center gap-2"
+                                            :class="noteForm.type === 'note' ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                        >
+                                            <MessageSquare class="w-4 h-4" /> Note générique
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="noteForm.type = 'call'"
+                                            class="px-4 py-2 rounded-lg text-sm font-medium border transition-colors flex items-center gap-2"
+                                            :class="noteForm.type === 'call' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                        >
+                                            <Phone class="w-4 h-4" /> Appel effectif
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="noteForm.type = 'email'"
+                                            class="px-4 py-2 rounded-lg text-sm font-medium border transition-colors flex items-center gap-2"
+                                            :class="noteForm.type === 'email' ? 'bg-cyan-50 border-cyan-200 text-cyan-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                        >
+                                            <Mail class="w-4 h-4" /> Email envoyé
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="noteForm.type = 'meeting'"
+                                            class="px-4 py-2 rounded-lg text-sm font-medium border transition-colors flex items-center gap-2"
+                                            :class="noteForm.type === 'meeting' ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                        >
+                                            <Calendar class="w-4 h-4" /> Rendez-vous
+                                        </button>
+                                    </div>
+
                                     <textarea 
                                         v-model="noteForm.content"
                                         rows="3" 
                                         class="w-full text-sm rounded-lg border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mb-3 resize-none p-3 bg-slate-50"
-                                        placeholder="Note confidentielle pour l'équipe..."
+                                        :placeholder="noteForm.type === 'call' ? 'Résumé de l\'appel...' : noteForm.type === 'email' ? 'Sujet ou contenu de l\'email...' : noteForm.type === 'meeting' ? 'Compte-rendu du rendez-vous...' : 'Note confidentielle...'"
                                         required
                                     ></textarea>
                                     <div class="flex justify-end">
@@ -387,7 +519,7 @@ const deleteNote = (noteId: number) => {
                                             :disabled="noteForm.processing || !noteForm.content.trim()"
                                             class="gap-2 bg-indigo-600 hover:bg-indigo-700 h-9"
                                         >
-                                            <Plus class="w-4 h-4" /> Enregistrer la note
+                                            <Plus class="w-4 h-4" /> Consigner l'activité
                                         </Button>
                                     </div>
                                     <p v-if="noteForm.errors.content" class="text-sm text-red-600 mt-2">{{ noteForm.errors.content }}</p>
@@ -399,27 +531,59 @@ const deleteNote = (noteId: number) => {
                                 <div 
                                     v-for="note in lead.notes" 
                                     :key="note.id" 
-                                    class="bg-amber-50/50 border border-amber-100 rounded-xl p-5 relative group"
+                                    class="border rounded-xl p-5 relative group"
+                                    :class="{
+                                        'bg-amber-50/50 border-amber-100': note.type === 'note',
+                                        'bg-blue-50/50 border-blue-100': note.type === 'call',
+                                        'bg-cyan-50/50 border-cyan-100': note.type === 'email',
+                                        'bg-purple-50/50 border-purple-100': note.type === 'meeting'
+                                    }"
                                 >
                                     <div class="flex justify-between items-start mb-2">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold uppercase">
-                                                {{ note.author.substring(0, 2) }}
+                                        <div class="flex items-center gap-3">
+                                            <div 
+                                                class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border"
+                                                :class="{
+                                                    'bg-amber-100 text-amber-600 border-amber-200': note.type === 'note',
+                                                    'bg-blue-100 text-blue-600 border-blue-200': note.type === 'call',
+                                                    'bg-cyan-100 text-cyan-600 border-cyan-200': note.type === 'email',
+                                                    'bg-purple-100 text-purple-600 border-purple-200': note.type === 'meeting'
+                                                }"
+                                            >
+                                                <MessageSquare v-if="note.type === 'note'" class="w-4 h-4" />
+                                                <Phone v-if="note.type === 'call'" class="w-4 h-4" />
+                                                <Mail v-if="note.type === 'email'" class="w-4 h-4" />
+                                                <Calendar v-if="note.type === 'meeting'" class="w-4 h-4" />
                                             </div>
                                             <div>
-                                                <p class="text-xs font-semibold text-slate-800">{{ note.author }}</p>
-                                                <p class="text-[10px] text-slate-500">{{ new Date(note.created_at).toLocaleString() }}</p>
+                                                <div class="flex items-center gap-1.5">
+                                                    <span class="text-[10px] uppercase font-bold tracking-wider"
+                                                        :class="{
+                                                            'text-amber-700': note.type === 'note',
+                                                            'text-blue-700': note.type === 'call',
+                                                            'text-cyan-700': note.type === 'email',
+                                                            'text-purple-700': note.type === 'meeting'
+                                                        }"
+                                                    >
+                                                        {{ note.type === 'note' ? 'Note interne' : note.type === 'call' ? 'Appel' : note.type === 'email' ? 'Email' : 'Rendez-vous' }}
+                                                    </span>
+                                                    <span class="text-slate-300">•</span>
+                                                    <p class="text-xs font-semibold text-slate-700">{{ note.author }}</p>
+                                                </div>
+                                                <p class="text-[10px] text-slate-500">{{ new Date(note.created_at).toLocaleString([], { dateStyle: 'long', timeStyle: 'short' }) }}</p>
                                             </div>
                                         </div>
                                         <button 
                                             @click="deleteNote(note.id)" 
-                                            class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-all"
+                                            class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-all border border-transparent hover:border-red-100"
                                             title="Supprimer"
                                         >
                                             <Trash2 class="w-4 h-4" />
                                         </button>
                                     </div>
-                                    <p class="text-sm text-slate-700 whitespace-pre-wrap">{{ note.content }}</p>
+                                    <div class="pl-11 pr-2 pt-1 text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">
+                                        {{ note.content }}
+                                    </div>
                                 </div>
                             </div>
 

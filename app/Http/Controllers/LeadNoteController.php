@@ -16,6 +16,7 @@ class LeadNoteController extends Controller
     {
         $validated = $request->validate([
             'content' => ['required', 'string', 'max:5000'],
+            'type' => ['sometimes', 'string', 'in:note,call,email,meeting'],
         ]);
 
         $record = LeadRecord::query()
@@ -26,6 +27,7 @@ class LeadNoteController extends Controller
         $record->notes()->create([
             'user_id' => $request->user()->id,
             'content' => $validated['content'],
+            'type' => $validated['type'] ?? 'note',
         ]);
 
         return back()->with('success', 'Note ajoutée avec succès.');

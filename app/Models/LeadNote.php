@@ -11,7 +11,7 @@ class LeadNote extends Model
 {
     use BelongsToCompany;
 
-    protected $fillable = ['lead_record_id', 'user_id', 'content', 'company_id'];
+    protected $fillable = ['lead_record_id', 'user_id', 'content', 'company_id', 'type'];
 
     public function user(): BelongsTo
     {

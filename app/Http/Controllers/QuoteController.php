@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\QuoteSentMail;
 
 class QuoteController extends Controller
 {
@@ -236,5 +238,31 @@ class QuoteController extends Controller
         $quote->delete();
 
         return to_route('leads.show', $leadId);
+    }
+
+    public function sendEmail(Request $request, int $quoteId)
+    {
+        $quote = Quote::with('leadRecord')->whereKey($quoteId)->firstOrFail();
+        
+        if (!$quote->leadRecord->email) {
+            return back()->with('error', "Le prospect n'a pas d'adresse e-mail configurée.");
+        }
+
+        // Send email
+        Mail::to($quote->leadRecord->email)->send(new QuoteSentMail($quote));
+
+        // Update status if it was a draft
+        if ($quote->status === 'draft') {
+            $quote->update(['status' => 'sent']);
+        }
+
+        // Add a note in the CRM
+        $quote->leadRecord->notes()->create([
+            'user_id' => $request->user()->id,
+            'type' => 'email',
+            'content' => "Devis N°{$quote->quote_number} envoyé au client par e-mail.",
+        ]);
+
+        return back()->with('success', 'Devis envoyé avec succès !');
     }
 }

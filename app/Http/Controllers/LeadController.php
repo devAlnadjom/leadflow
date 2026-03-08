@@ -133,6 +133,7 @@ class LeadController extends Controller
                 'notes' => $record->notes->map(fn ($note) => [
                     'id' => $note->id,
                     'content' => $note->content,
+                    'type' => $note->type,
                     'author' => $note->user?->name ?? 'Système',
                     'created_at' => $note->created_at?->toDateTimeString(),
                 ]),

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { dashboard, login, register } from '@/routes';
-import { ArrowRight, BarChart3, Users, Zap, CheckCircle2, LayoutTemplate, Briefcase } from 'lucide-vue-next';
+import { ArrowRight, BarChart3, Users, Zap, CheckCircle2, LayoutTemplate, Briefcase, Plus, Minus, ChevronDown } from 'lucide-vue-next';
 
 withDefaults(
     defineProps<{
@@ -11,6 +12,35 @@ withDefaults(
         canRegister: true,
     },
 );
+
+const faqs = [
+    {
+        question: "Qu'est-ce que Leadflow exactement ?",
+        answer: "Leadflow est une plateforme tout-en-un conçue pour les entreprises de services. Elle combine un générateur de formulaires pour capturer des prospects sur votre site web, un CRM simplifié pour les gérer, et un outil de devis pour finaliser vos ventes rapidement."
+    },
+    {
+        question: "Comment s'intègre le widget métier sur mon site ?",
+        answer: "C'est très simple ! Vous créez votre formulaire personnalisé dans Leadflow, et nous vous donnons un petit bout de code à copier-coller sur votre site (WordPress, Wix, Webflow, Shopify...). Le formulaire apparaîtra instantanément."
+    },
+    {
+        question: "Est-ce difficile de créer et d'envoyer des devis ?",
+        answer: "Pas du tout ! Leadflow génère automatiquement un environnement sécurisé pour vos devis. Vous ajoutez vos lignes de services, les montants, et vous partagez un lien unique à votre prospect. Il peut l'accepter ou le refuser en ligne, directement depuis son téléphone ou son ordinateur."
+    },
+    {
+        question: "Que se passe-t-il après avoir capturé un lead ?",
+        answer: "Il apparaît immédiatement dans votre pipeline (Kanban). Vous recevez une notification, et vous pouvez alors le qualifier, ajouter des notes internes, et lui envoyer une soumission (devis) sans jamais quitter l'application."
+    },
+    {
+        question: "Ai-je besoin d'une carte de crédit pour essayer ?",
+        answer: "Non, aucune carte bancaire n'est requise. Vous disposez de 14 jours d'essai gratuit pour explorer toutes les fonctionnalités, créer vos widgets et tester la gestion de leads."
+    }
+];
+
+const openFaq = ref<number | null>(0);
+
+const toggleFaq = (index: number) => {
+    openFaq.value = openFaq.value === index ? null : index;
+};
 </script>
 
 <template>
@@ -208,6 +238,48 @@ withDefaults(
                             <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600 dark:text-slate-400">
                                 <p class="flex-auto">Envoyez des soumissions professionnelles en un clic, directement depuis la fiche de votre lead. Convertissez-les en factures sans perte de temps.</p>
                             </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="bg-slate-50 py-24 sm:py-32 dark:bg-slate-950">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-4xl divide-y divide-slate-900/10 dark:divide-white/10">
+                    <h2 class="text-2xl font-bold leading-10 tracking-tight text-slate-900 dark:text-white mb-8">
+                        Questions fréquentes
+                    </h2>
+                    <dl class="mt-10 space-y-6 divide-y divide-slate-900/10 dark:divide-white/10">
+                        <div v-for="(faq, index) in faqs" :key="index" class="pt-6">
+                            <dt>
+                                <button
+                                    type="button"
+                                    class="flex w-full items-start justify-between text-left text-slate-900 dark:text-white"
+                                    @click="toggleFaq(index)"
+                                >
+                                    <span class="text-base font-semibold leading-7">{{ faq.question }}</span>
+                                    <span class="ml-6 flex h-7 items-center">
+                                        <Plus v-if="openFaq !== index" class="h-5 w-5 text-indigo-600" aria-hidden="true" />
+                                        <Minus v-else class="h-5 w-5 text-indigo-600" aria-hidden="true" />
+                                    </span>
+                                </button>
+                            </dt>
+                            <transition
+                                enter-active-class="transition duration-100 ease-out"
+                                enter-from-class="transform scale-95 opacity-0"
+                                enter-to-class="transform scale-100 opacity-100"
+                                leave-active-class="transition duration-75 ease-out"
+                                leave-from-class="transform scale-100 opacity-100"
+                                leave-to-class="transform scale-95 opacity-0"
+                            >
+                                <dd v-if="openFaq === index" class="mt-4 pr-12">
+                                    <p class="text-base leading-7 text-slate-600 dark:text-slate-400">
+                                        {{ faq.answer }}
+                                    </p>
+                                </dd>
+                            </transition>
                         </div>
                     </dl>
                 </div>
