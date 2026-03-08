@@ -24,7 +24,7 @@ class CompanySettingsController extends Controller
         }
 
         return Inertia::render('settings/Company', [
-            'company' => array_merge($user->company->only([
+            'company' => $user->company->only([
                 'name',
                 'description',
                 'phone',
@@ -34,9 +34,8 @@ class CompanySettingsController extends Controller
                 'address',
                 'primary_color',
                 'secondary_color',
-            ]), [
-                'logo_url' => $user->company->logo_path ? Storage::url($user->company->logo_path) : null,
             ]),
+            'logo_url' => $user->company->logo_path ? Storage::url($user->company->logo_path) : null,
             'servedAreas' => $user->company->served_areas ?? [],
             'settings' => $user->company->settings?->only([
                 'quote_prefix',
@@ -47,6 +46,7 @@ class CompanySettingsController extends Controller
                 'tax2_rate',
                 'currency',
                 'terms_and_conditions',
+                'legal_mentions',
             ]) ?? [
                 'quote_prefix' => 'QUO',
                 'invoice_prefix' => 'INV',
@@ -56,6 +56,7 @@ class CompanySettingsController extends Controller
                 'tax2_rate' => 9.975,
                 'currency' => 'USD',
                 'terms_and_conditions' => null,
+                'legal_mentions' => [],
             ],
         ]);
     }

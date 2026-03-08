@@ -48,6 +48,10 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::post('leads/{lead}/notes', [LeadNoteController::class, 'store'])->name('leads.notes.store');
     Route::delete('leads/{lead}/notes/{note}', [LeadNoteController::class, 'destroy'])->name('leads.notes.destroy');
 
+    Route::post('tasks', [\App\Http\Controllers\TaskController::class, 'store'])->name('tasks.store');
+    Route::patch('tasks/{task}', [\App\Http\Controllers\TaskController::class, 'update'])->name('tasks.update');
+    Route::delete('tasks/{task}', [\App\Http\Controllers\TaskController::class, 'destroy'])->name('tasks.destroy');
+
     Route::resource('clients', \App\Http\Controllers\ClientController::class);
     Route::post('/clients/{client}/notes', [\App\Http\Controllers\ClientNoteController::class, 'store'])->name('clients.notes.store');
     Route::delete('/clients/{client}/notes/{note}', [\App\Http\Controllers\ClientNoteController::class, 'destroy'])->name('clients.notes.destroy');

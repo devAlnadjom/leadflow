@@ -80,6 +80,15 @@ const addLegalMention = () => {
 const removeLegalMention = (index: number) => {
     legalMentionsRef.value.splice(index, 1);
 };
+
+const logoPreview = ref<string | null>(props.logo_url ?? null);
+
+const handleLogoChange = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+        logoPreview.value = URL.createObjectURL(target.files[0]);
+    }
+};
 </script>
 
 <template>
@@ -125,10 +134,10 @@ const removeLegalMention = (index: number) => {
                     <div class="grid gap-2">
                         <Label for="logo">Logo de l'entreprise</Label>
                         <div class="flex items-center gap-4">
-                            <div v-if="logo_url" class="h-16 w-16 overflow-hidden rounded-md border border-input mt-2">
-                                <img :src="logo_url" alt="Logo" class="h-full w-full object-cover" />
+                            <div v-if="logoPreview" class="h-16 w-16 overflow-hidden rounded-md border border-input mt-2">
+                                <img :src="logoPreview" alt="Logo" class="h-full w-full object-cover" />
                             </div>
-                            <div v-else class="h-16 w-16 overflow-hidden rounded-md border border-input mt-2 bg-muted flex items-center justify-center text-muted-foreground text-xs text-center">
+                            <div v-else class="h-16 w-16 overflow-hidden rounded-md border border-input mt-2 bg-muted flex items-center justify-center text-muted-foreground text-xs text-center p-2">
                                 Aucun logo
                             </div>
                             <Input
@@ -137,6 +146,7 @@ const removeLegalMention = (index: number) => {
                                 type="file"
                                 accept="image/*"
                                 class="flex-1"
+                                @change="handleLogoChange"
                             />
                         </div>
                         <InputError :message="errors.logo" />

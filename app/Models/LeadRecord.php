@@ -72,4 +72,12 @@ class LeadRecord extends Model
     {
         return $this->belongsTo(Client::class);
     }
+
+    /**
+     * Get the tasks for this lead record.
+     */
+    public function tasks(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Task::class)->latest();
+    }
 }

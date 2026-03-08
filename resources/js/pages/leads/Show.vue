@@ -19,7 +19,11 @@ import {
     MoreHorizontal,
     Plus,
     UserCircle2,
-    Check
+    Check,
+    Calendar,
+    Bell,
+    CheckSquare,
+    Square
 } from 'lucide-vue-next';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
@@ -74,6 +78,15 @@ type LeadPayload = {
         total: number;
         expire_at: string | null;
         created_at: string;
+    }>;
+    tasks?: Array<{
+        id: number;
+        title: string;
+        description: string | null;
+        due_date: string | null;
+        is_completed: boolean;
+        created_at: string;
+        author: string;
     }>;
 };
 
@@ -174,9 +187,35 @@ const submitNote = () => {
         preserveScroll: true,
         onSuccess: () => {
             noteForm.reset('content');
-            // Keep the selected type for convenience, or reset it: noteForm.reset('content', 'type')
         },
     });
+};
+
+const taskForm = useForm({
+    title: '',
+    description: '',
+    due_date: '',
+    lead_record_id: props.lead.id
+});
+
+const isAddingTask = ref(false);
+
+const submitTask = () => {
+    taskForm.post('/tasks', {
+        preserveScroll: true,
+        onSuccess: () => {
+            taskForm.reset('title', 'description', 'due_date');
+            isAddingTask.value = false;
+        }
+    });
+};
+
+const toggleTask = (task: any) => {
+    router.patch(`/tasks/${task.id}`, { is_completed: !task.is_completed }, { preserveScroll: true });
+};
+
+const deleteTask = (taskId: number) => {
+    router.delete(`/tasks/${taskId}`, { preserveScroll: true });
 };
 
 const activities = computed(() => {
@@ -247,6 +286,21 @@ const activities = computed(() => {
                 color: 'text-indigo-600',
                 bg: 'bg-indigo-100',
                 border: 'border-indigo-200'
+            });
+        });
+    }
+
+    if (props.lead.tasks) {
+        props.lead.tasks.forEach(task => {
+            events.push({
+                id: `task-${task.id}`,
+                title: 'Rappel programmé',
+                description: `Tâche: ${task.title}` + (task.due_date ? ` (Pour le ${new Date(task.due_date).toLocaleDateString()})` : ''),
+                date: task.created_at,
+                icon: Bell,
+                color: 'text-pink-600',
+                bg: 'bg-pink-100',
+                border: 'border-pink-200'
             });
         });
     }
@@ -424,6 +478,57 @@ const activities = computed(() => {
                         </div>
                     </section>
 
+                    <!-- Tasks & Reminders Card -->
+                    <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                        <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                            <h3 class="font-semibold text-slate-800 flex items-center gap-2">
+                                <Bell class="w-4 h-4 text-pink-500" /> Tâches & Relances
+                            </h3>
+                            <Button variant="ghost" size="sm" class="h-8 px-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50" @click="isAddingTask = !isAddingTask">
+                                <Plus class="w-4 h-4" />
+                            </Button>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col gap-4">
+                            <!-- Task Form -->
+                            <form v-if="isAddingTask" @submit.prevent="submitTask" class="bg-slate-50 border border-slate-100 rounded-lg p-4 space-y-3 mb-2 shadow-sm">
+                                <div>
+                                    <input v-model="taskForm.title" type="text" placeholder="Titre de la tâche (ex. Rappeler le client)" class="w-full text-sm rounded-lg border-slate-200 focus:border-indigo-500 py-2 transition-colors duration-200 bg-white" required />
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input v-model="taskForm.due_date" type="datetime-local" class="w-full text-xs rounded-lg border-slate-200 focus:border-indigo-500 py-2 outline-none transition-colors duration-200 bg-white" />
+                                    <Button type="submit" :disabled="taskForm.processing" class="bg-indigo-600 hover:bg-indigo-700 shrink-0 w-full col-span-1 h-auto text-xs py-1.5 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 flex items-center justify-center">
+                                        {{ taskForm.processing ? 'En cours...' : 'Ajouter' }}
+                                    </Button>
+                                    <div v-if="taskForm.errors.due_date" class="col-span-2 text-red-500 text-xs">{{ taskForm.errors.due_date }}</div>
+                                </div>
+                            </form>
+                            
+                            <!-- Task List -->
+                            <div class="space-y-3 flex-1">
+                                <div v-if="!lead.tasks || lead.tasks.length === 0" class="text-sm text-slate-500 italic text-center py-4 bg-slate-50/50 rounded-lg border border-slate-100/50 border-dashed">
+                                    Aucune tâche de relance.
+                                </div>
+                                <div v-for="task in lead.tasks" :key="task.id" class="flex flex-col gap-1 p-3 rounded-lg border transition-all duration-200" :class="task.is_completed ? 'bg-slate-50 border-slate-100 opacity-60 grayscale-[0.5]' : 'bg-white border-slate-200 shadow-sm hover:shadow-md'">
+                                    <div class="flex items-start gap-3">
+                                        <button @click="toggleTask(task)" class="mt-0.5 text-slate-400 hover:text-indigo-600 transition-colors duration-200 focus:outline-none shrink-0" :class="task.is_completed ? 'text-emerald-500 hover:text-emerald-600' : ''">
+                                            <component :is="task.is_completed ? CheckSquare : Square" class="w-5 h-5" />
+                                        </button>
+                                        <div class="flex-1 min-w-0 flex flex-col">
+                                            <div class="flex justify-between items-start gap-2">
+                                                <p class="text-sm font-semibold text-slate-800 break-words flex-1 leading-snug" :class="{'line-through text-slate-500': task.is_completed}">{{ task.title }}</p>
+                                                <button @click="deleteTask(task.id)" class="text-slate-300 hover:text-red-500 transition-colors duration-200 shrink-0 focus:outline-none">
+                                                    <Trash2 class="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                            <p v-if="task.due_date" class="text-[11px] font-medium mt-1 flex items-center gap-1.5" :class="task.is_completed ? 'text-slate-400' : (new Date(task.due_date) < new Date() ? 'text-red-600 bg-red-50 px-1.5 py-0.5 rounded-sm w-fit' : 'text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-sm w-fit')">
+                                                <Clock class="w-3 h-3" /> Echéance : {{ new Date(task.due_date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
                 </div>
 
                 <!-- Right Main Area: Tabs (Activity, Devis, Notes) -->

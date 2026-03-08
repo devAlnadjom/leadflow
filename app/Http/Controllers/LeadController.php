@@ -114,7 +114,7 @@ class LeadController extends Controller
     public function show(Request $request, int $lead): Response
     {
         $record = $this->resolveCompanyLead($request, $lead);
-        $record->load(['notes.user:id,name', 'quotes']);
+        $record->load(['notes.user:id,name', 'quotes', 'tasks.user:id,name']);
 
         return Inertia::render('leads/Show', [
             'lead' => [
@@ -146,6 +146,15 @@ class LeadController extends Controller
                     'total' => $quote->total,
                     'expire_at' => $quote->expire_at?->toDateString(),
                     'created_at' => $quote->created_at?->toDateTimeString(),
+                ]),
+                'tasks' => $record->tasks->map(fn ($task) => [
+                    'id' => $task->id,
+                    'title' => $task->title,
+                    'description' => $task->description,
+                    'due_date' => $task->due_date?->toDateTimeString(),
+                    'is_completed' => $task->is_completed,
+                    'created_at' => $task->created_at?->toDateTimeString(),
+                    'author' => $task->user?->name ?? 'Système',
                 ]),
             ],
         ]);
