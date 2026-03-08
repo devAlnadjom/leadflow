@@ -119,6 +119,7 @@ class LeadController extends Controller
         return Inertia::render('leads/Show', [
             'lead' => [
                 'id' => $record->id,
+                'client_id' => $record->client_id,
                 'lead_form_id' => $record->lead_form_id,
                 'lead_form_name' => $record->leadForm?->name ?? '-',
                 'name' => $record->name,
@@ -238,5 +239,54 @@ class LeadController extends Controller
         $record->update(['status' => $validated['status']]);
 
         return back();
+    }
+
+    /**
+     * Convert a lead to a client.
+     */
+    public function convert(Request $request, int $lead): RedirectResponse
+    {
+        $record = LeadRecord::query()
+            ->with(['quotes', 'leadForm:id,name,company_id'])
+            ->whereKey($lead)
+            ->whereHas('leadForm', fn ($query) => $query->where('company_id', $request->user()->company_id))
+            ->firstOrFail();
+
+        if ($record->client_id) {
+            return back()->with('error', 'Ce prospect est déjà rattaché à un client.');
+        }
+
+        if (!$record->name) {
+            return back()->with('error', 'Le prospect doit avoir au moins un nom pour être converti en client.');
+        }
+
+        // Create the new client
+        $client = $request->user()->company->clients()->create([
+            'name' => $record->name,
+            'email' => $record->email,
+            'phone' => $record->phone,
+            'company_name' => $record->payload['company'] ?? null,
+        ]);
+
+        // Link the lead and its quotes to the client
+        $record->update([
+            'client_id' => $client->id,
+            'status' => 'won' // Automatically win the lead
+        ]);
+
+        if ($record->quotes->count() > 0) {
+            foreach ($record->quotes as $quote) {
+                $quote->update(['client_id' => $client->id]);
+            }
+        }
+
+        // Add a note
+        $record->notes()->create([
+            'user_id' => $request->user()->id,
+            'type' => 'note',
+            'content' => "Prospect converti en Client.",
+        ]);
+
+        return back()->with('success', 'Prospect converti en client avec succès !');
     }
 }

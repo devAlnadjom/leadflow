@@ -5,6 +5,9 @@ import { createApp, h } from 'vue';
 import '../css/app.css';
 import { initializeTheme } from '@/composables/useAppearance';
 
+import { Toaster } from '@/components/ui/sonner';
+import FlashMessage from '@/components/FlashMessage.vue';
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -15,7 +18,13 @@ createInertiaApp({
             import.meta.glob<DefineComponent>('./pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
+        createApp({ 
+            render: () => [
+                h(App, props),
+                h(FlashMessage),
+                h(Toaster, { position: 'top-center' })
+            ] 
+        })
             .use(plugin)
             .mount(el);
     },

@@ -65,4 +65,12 @@ class Company extends Model
     {
         return $this->hasMany(LeadForm::class);
     }
+
+    /**
+     * Get all clients for this company.
+     */
+    public function clients(): HasMany
+    {
+        return $this->hasMany(Client::class);
+    }
 }

@@ -20,6 +20,7 @@ class LeadRecord extends Model
     protected $fillable = [
         'lead_form_id',
         'company_id',
+        'client_id',
         'name',
         'email',
         'phone',
@@ -62,5 +63,13 @@ class LeadRecord extends Model
     public function quotes(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Quote::class)->latest();
+    }
+
+    /**
+     * Get the client associated with this lead record.
+     */
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 }

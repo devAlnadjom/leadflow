@@ -33,12 +33,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useI18n } from '@/composables/useI18n';
 import type { BreadcrumbItem } from '@/types';
 
 type LeadPayload = {
     id: number;
+    client_id: number | null;
     lead_form_id: number;
     lead_form_name: string;
     name: string | null;
@@ -85,9 +95,42 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
     },
 ]);
 
-const removeLead = (): void => {
-    if(confirm('Voulez-vous vraiment supprimer ce lead ? Il sera effacé définitivement.')) {
-        router.delete(`/leads/${props.lead.id}`);
+const confirmAction = ref<'removeLead' | 'convertToClient' | 'deleteNote' | null>(null);
+const confirmPayload = ref<number | null>(null);
+
+const confirmRemoveLead = (): void => {
+    confirmAction.value = 'removeLead';
+};
+
+const converting = ref(false);
+const confirmConvertToClient = (): void => {
+    confirmAction.value = 'convertToClient';
+};
+
+const confirmDeleteNote = (noteId: number) => {
+    confirmAction.value = 'deleteNote';
+    confirmPayload.value = noteId;
+};
+
+const executeConfirm = () => {
+    if (confirmAction.value === 'removeLead') {
+        router.delete(`/leads/${props.lead.id}`, {
+            onFinish: () => confirmAction.value = null
+        });
+    } else if (confirmAction.value === 'convertToClient') {
+        converting.value = true;
+        router.post(`/leads/${props.lead.id}/convert`, {}, {
+            preserveScroll: true,
+            onFinish: () => {
+                converting.value = false;
+                confirmAction.value = null;
+            },
+        });
+    } else if (confirmAction.value === 'deleteNote' && confirmPayload.value) {
+        router.delete(`/leads/${props.lead.id}/notes/${confirmPayload.value}`, {
+            preserveScroll: true,
+            onFinish: () => confirmAction.value = null
+        });
     }
 };
 
@@ -134,14 +177,6 @@ const submitNote = () => {
             // Keep the selected type for convenience, or reset it: noteForm.reset('content', 'type')
         },
     });
-};
-
-const deleteNote = (noteId: number) => {
-    if(confirm('Voulez-vous vraiment supprimer cette note ?')) {
-        router.delete(`/leads/${props.lead.id}/notes/${noteId}`, {
-            preserveScroll: true
-        });
-    }
 };
 
 const activities = computed(() => {
@@ -238,7 +273,7 @@ const activities = computed(() => {
                             {{ lead.name || 'Contact Anonyme' }}
                         </h1>
                         <div class="flex items-center gap-3 text-sm text-slate-500 mt-1">
-                            <DropdownMenu>
+                            <DropdownMenu v-if="!lead.client_id">
                                 <DropdownMenuTrigger asChild>
                                     <button class="inline-flex items-center gap-1.5 font-medium hover:opacity-80 transition-opacity" :class="currentStatus.color.split(' ')[0]">
                                         <component :is="currentStatus.icon" class="w-4 h-4" />
@@ -260,6 +295,10 @@ const activities = computed(() => {
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
+                            <Badge v-else class="bg-indigo-100 text-indigo-700 hover:bg-indigo-100 pointer-events-none gap-1 border-indigo-200 shadow-sm" variant="outline">
+                                <Briefcase class="w-3.5 h-3.5" /> Client rattaché
+                            </Badge>
+
                             <span class="w-1 h-1 rounded-full bg-slate-300"></span>
                             <span>Ajouté le {{ lead.created_at ? new Date(lead.created_at).toLocaleDateString() : '-' }}</span>
                         </div>
@@ -272,8 +311,21 @@ const activities = computed(() => {
                             <Edit2 class="w-4 h-4" /> Modifier
                         </Link>
                     </Button>
-                    <!-- Placeholder future features -->
-                    <Button class="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm" as-child>
+                    <Button 
+                        v-if="!lead.client_id"
+                        @click="confirmConvertToClient" 
+                        class="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all" 
+                        :disabled="converting"
+                    >
+                        <template v-if="converting">
+                            <span class="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin"></span>
+                            Conversion...
+                        </template>
+                        <template v-else>
+                            <Briefcase class="w-4 h-4" /> Convertir en Client
+                        </template>
+                    </Button>
+                    <Button v-else class="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm" as-child>
                         <Link :href="`/leads/${lead.id}/quotes/create`">
                             <FileText class="w-4 h-4" /> Créer Devis
                         </Link>
@@ -285,7 +337,13 @@ const activities = computed(() => {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" class="w-48">
-                            <DropdownMenuItem class="text-red-600 focus:bg-red-50 focus:text-red-700" @click="removeLead">
+                            <DropdownMenuItem v-if="!lead.client_id" class="cursor-pointer" as-child>
+                                <Link :href="`/leads/${lead.id}/quotes/create`" class="w-full h-full flex items-center">
+                                    <FileText class="w-4 h-4 mr-2" /> Créer un devis
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator v-if="!lead.client_id" />
+                            <DropdownMenuItem class="text-red-600 focus:bg-red-50 focus:text-red-700 cursor-pointer" @click="confirmRemoveLead">
                                 <Trash2 class="w-4 h-4 mr-2" /> Supprimer le lead
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -574,7 +632,7 @@ const activities = computed(() => {
                                             </div>
                                         </div>
                                         <button 
-                                            @click="deleteNote(note.id)" 
+                                            @click="confirmDeleteNote(note.id)" 
                                             class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-all border border-transparent hover:border-red-100"
                                             title="Supprimer"
                                         >
@@ -603,5 +661,34 @@ const activities = computed(() => {
 
             </div>
         </div>
+        
+        <!-- Shadcn UI Global Confirmation Dialog -->
+        <AlertDialog :open="confirmAction !== null" @update:open="(val) => { if (!val) confirmAction = null }">
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>
+                        {{ confirmAction === 'removeLead' ? 'Supprimer le lead ?' : 
+                           confirmAction === 'convertToClient' ? 'Convertir en client ?' : 
+                           'Supprimer la note ?' }}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {{ confirmAction === 'removeLead' ? 'Êtes-vous sûr de vouloir supprimer ce lead ? Cette action est irréversible et supprimera également toutes les notes associées.' : 
+                           confirmAction === 'convertToClient' ? 'Voulez-vous convertir ce prospect en client ? Cela créera un dossier client permanent avec ses informations.' : 
+                           'Êtes-vous sûr de vouloir supprimer cette note ? Cette action est irréversible.' }}
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel @click="confirmAction = null">Annuler</AlertDialogCancel>
+                    <button 
+                        @click="executeConfirm" 
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 text-white"
+                        :class="confirmAction === 'convertToClient' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'"
+                    >
+                        {{ confirmAction === 'convertToClient' ? 'Convertir' : 'Supprimer' }}
+                    </button>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
     </AppLayout>
 </template>

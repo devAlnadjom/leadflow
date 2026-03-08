@@ -40,8 +40,14 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
     Route::resource('leads', LeadController::class);
     Route::patch('leads/{lead}/status', [LeadController::class, 'updateStatus'])->name('leads.update_status');
+    Route::post('/leads/convert', [LeadController::class, 'storeConvertedClient'])->name('leads.store_client');
+    Route::post('leads/{lead}/convert', [LeadController::class, 'convert'])->name('leads.convert');
     Route::post('leads/{lead}/notes', [LeadNoteController::class, 'store'])->name('leads.notes.store');
     Route::delete('leads/{lead}/notes/{note}', [LeadNoteController::class, 'destroy'])->name('leads.notes.destroy');
+
+    Route::resource('clients', \App\Http\Controllers\ClientController::class);
+    Route::post('/clients/{client}/notes', [\App\Http\Controllers\ClientNoteController::class, 'store'])->name('clients.notes.store');
+    Route::delete('/clients/{client}/notes/{note}', [\App\Http\Controllers\ClientNoteController::class, 'destroy'])->name('clients.notes.destroy');
 
     Route::get('quotes', [\App\Http\Controllers\QuoteController::class, 'index'])->name('quotes.index');
     Route::get('leads/{lead}/quotes/create', [\App\Http\Controllers\QuoteController::class, 'create'])->name('quotes.create');

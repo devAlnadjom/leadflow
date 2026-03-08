@@ -19,6 +19,15 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import type { BreadcrumbItem } from '@/types';
 
 interface Item {
@@ -104,9 +113,25 @@ const submit = () => {
     form.put(`/quotes/${props.quote.id}`);
 };
 
-const deleteQuote = () => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce devis ? Cette action est irréversible.')) {
-        router.delete(`/quotes/${props.quote.id}`);
+const confirmAction = ref<'deleteQuote' | 'sendEmail' | null>(null);
+
+const confirmDeleteQuote = () => confirmAction.value = 'deleteQuote';
+const confirmSendEmail = () => confirmAction.value = 'sendEmail';
+
+const executeConfirm = () => {
+    if (confirmAction.value === 'deleteQuote') {
+        router.delete(`/quotes/${props.quote.id}`, {
+            onFinish: () => confirmAction.value = null
+        });
+    } else if (confirmAction.value === 'sendEmail') {
+        sendingEmail.value = true;
+        router.post(`/quotes/${props.quote.id}/send`, {}, {
+            preserveScroll: true,
+            onFinish: () => {
+                sendingEmail.value = false;
+                confirmAction.value = null;
+            },
+        });
     }
 };
 
@@ -125,16 +150,6 @@ const copyLink = () => {
 };
 
 const sendingEmail = ref(false);
-
-const sendEmail = () => {
-    if (confirm("Voulez-vous envoyer ce devis par email à l'adresse du prospet ?")) {
-        sendingEmail.value = true;
-        router.post(`/quotes/${props.quote.id}/send`, {}, {
-            preserveScroll: true,
-            onFinish: () => sendingEmail.value = false,
-        });
-    }
-}
 
 const breadcrumbs = computed<BreadcrumbItem[]>(() => [
     { title: 'Leads', href: '/leads' },
@@ -160,7 +175,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
                     <p class="text-slate-500 mt-1">Devis pour <span class="font-semibold text-slate-700">{{ lead.name }}</span> <span v-if="lead.email" class="text-slate-400 text-sm border bg-slate-50 px-2 py-0.5 rounded">{{ lead.email }}</span></p>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                    <Button variant="outline" class="gap-2 text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600" @click="deleteQuote">
+                    <Button variant="outline" class="gap-2 text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600" @click="confirmDeleteQuote">
                         <Trash2 class="w-4 h-4" /> Supprimer
                     </Button>
                     <Button variant="outline" as-child>
@@ -171,7 +186,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
                         {{ form.processing ? 'Enregistrement...' : 'Sauvegarder' }}
                     </Button>
                     <Button 
-                        @click="sendEmail" 
+                        @click="confirmSendEmail" 
                         class="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 shadow-lg shadow-emerald-100 min-w-40" 
                         :disabled="sendingEmail || !lead.email"
                         :title="!lead.email ? 'Le prospect n\'a pas d\'adresse e-mail' : 'Envoyer par e-mail'"
@@ -357,5 +372,30 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
                 </div>
             </div>
         </div>
+
+        <!-- Shadcn UI Global Confirmation Dialog -->
+        <AlertDialog :open="confirmAction !== null" @update:open="(val) => { if (!val) confirmAction = null }">
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>
+                        {{ confirmAction === 'deleteQuote' ? 'Supprimer le devis ?' : 'Envoyer ce devis par email ?' }}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {{ confirmAction === 'deleteQuote' ? 'Êtes-vous sûr de vouloir supprimer ce devis ? Cette action est irréversible.' : 'Avez-vous bien relu ce devis ? En confirmant, un email avec le lien de visualisation et de signature sera envoyé directement au prospect.' }}
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel @click="confirmAction = null">Annuler</AlertDialogCancel>
+                    <button 
+                        @click="executeConfirm" 
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 text-white"
+                        :class="confirmAction === 'sendEmail' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-red-600 hover:bg-red-700'"
+                    >
+                        {{ confirmAction === 'sendEmail' ? 'Oui, envoyer au client' : 'Supprimer définitivement' }}
+                    </button>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
     </AppLayout>
 </template>

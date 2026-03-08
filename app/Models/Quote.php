@@ -15,6 +15,7 @@ class Quote extends Model
     protected $fillable = [
         'public_uid',
         'company_id',
+        'client_id',
         'lead_record_id',
         'quote_number',
         'status',
@@ -53,6 +54,11 @@ class Quote extends Model
 
     public function items(): HasMany
     {
-        return $this->hasMany(QuoteItem::class)->orderBy('sort_order');
+        return $this->hasMany(QuoteItem::class);
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 }
