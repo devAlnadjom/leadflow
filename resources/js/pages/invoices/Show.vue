@@ -16,7 +16,8 @@ import {
     Mail,
     Phone,
     ExternalLink,
-    Eye
+    Eye,
+    Edit
 } from 'lucide-vue-next';
 import { useI18n } from '@/composables/useI18n';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -153,6 +154,11 @@ const sendEmail = () => {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
+                    <Button variant="outline" class="gap-2" as-child>
+                        <Link :href="`/invoices/${invoice.id}/edit`">
+                            <Edit class="w-4 h-4" /> Éditer
+                        </Link>
+                    </Button>
                     <Button variant="outline" class="gap-2" @click="openPreview">
                         <Eye class="w-4 h-4" /> Prévisualiser
                     </Button>

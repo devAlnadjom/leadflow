@@ -139,6 +139,97 @@ class InvoiceController extends Controller
         });
     }
 
+    public function edit(Request $request, int $id): Response
+    {
+        $invoice = Invoice::with(['items', 'client'])->whereKey($id)->firstOrFail();
+        $company = $request->user()->company;
+        $settings = $company->settings;
+
+        return Inertia::render('invoices/Edit', [
+            'invoice' => [
+                'id' => $invoice->id,
+                'public_uid' => $invoice->public_uid,
+                'client_id' => $invoice->client_id,
+                'invoice_number' => $invoice->invoice_number,
+                'status' => $invoice->status,
+                'issue_date' => $invoice->issue_date?->toDateString(),
+                'due_date' => $invoice->due_date?->toDateString(),
+                'subtotal' => $invoice->subtotal,
+                'tax1_amount' => $invoice->tax1_amount,
+                'tax2_amount' => $invoice->tax2_amount,
+                'total' => $invoice->total,
+                'notes' => $invoice->notes,
+                'items' => $invoice->items->map(function($item) {
+                    return [
+                        'description' => $item->description,
+                        'quantity' => $item->quantity,
+                        'unit_price' => $item->unit_price,
+                        'total' => $item->total,
+                    ];
+                }),
+                'client' => $invoice->client,
+            ],
+            'client' => $invoice->client,
+            'settings' => $settings,
+        ]);
+    }
+
+    public function update(Request $request, int $id)
+    {
+        $validated = $request->validate([
+            'invoice_number' => ['required', 'string', 'max:255'],
+            'status' => ['required', 'string', 'in:draft,sent,paid,overdue,cancelled'],
+            'issue_date' => ['required', 'date'],
+            'due_date' => ['nullable', 'date'],
+            'notes' => ['nullable', 'string'],
+            'tax1_rate' => ['nullable', 'numeric', 'min:0'],
+            'tax2_rate' => ['nullable', 'numeric', 'min:0'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.description' => ['required', 'string', 'max:500'],
+            'items.*.quantity' => ['required', 'numeric', 'min:0.01'],
+            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        return DB::transaction(function () use ($request, $validated, $id) {
+            $invoice = Invoice::whereKey($id)->firstOrFail();
+
+            $subtotal = 0;
+            foreach ($validated['items'] as $item) {
+                $subtotal += ($item['quantity'] * $item['unit_price']);
+            }
+
+            $tax1Amount = $subtotal * (($validated['tax1_rate'] ?? 0) / 100);
+            $tax2Amount = $subtotal * (($validated['tax2_rate'] ?? 0) / 100);
+            $total = $subtotal + $tax1Amount + $tax2Amount;
+
+            $invoice->update([
+                'invoice_number' => $validated['invoice_number'],
+                'status' => $validated['status'],
+                'issue_date' => $validated['issue_date'],
+                'due_date' => $validated['due_date'],
+                'notes' => $validated['notes'],
+                'subtotal' => $subtotal,
+                'tax1_amount' => $tax1Amount,
+                'tax2_amount' => $tax2Amount,
+                'total' => $total,
+            ]);
+
+            // Sync items
+            $invoice->items()->delete();
+
+            foreach ($validated['items'] as $itemData) {
+                $invoice->items()->create([
+                    'description' => $itemData['description'],
+                    'quantity' => $itemData['quantity'],
+                    'unit_price' => $itemData['unit_price'],
+                    'total' => $itemData['quantity'] * $itemData['unit_price'],
+                ]);
+            }
+
+            return to_route('invoices.show', $invoice->id)->with('success', 'Facture mise à jour avec succès.');
+        });
+    }
+
     public function show(Request $request, int $id): Response
     {
         $invoice = Invoice::with(['items', 'client'])->whereKey($id)->firstOrFail();
