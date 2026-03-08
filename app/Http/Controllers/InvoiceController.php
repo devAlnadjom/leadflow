@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InvoiceMail;
 
 class InvoiceController extends Controller
 {
@@ -182,5 +184,32 @@ class InvoiceController extends Controller
         $invoice->delete();
 
         return to_route('clients.show', $clientId)->with('success', 'Facture supprimée.');
+    }
+
+    public function sendEmail(Request $request, int $id)
+    {
+        $invoice = Invoice::with(['client', 'company.settings'])->whereKey($id)->firstOrFail();
+        
+        if (!$invoice->client->email) {
+            return back()->with('error', "Le client n'a pas d'adresse e-mail configurée.");
+        }
+
+        // Send email
+        Mail::to($invoice->client->email)->send(new InvoiceMail($invoice));
+
+        // Update status if it was a draft
+        if ($invoice->status === 'draft') {
+            $invoice->update(['status' => 'sent']);
+        }
+
+        // Add a note in the CRM
+        $invoice->client->notes()->create([
+            'user_id' => $request->user()->id,
+            'type' => 'email',
+            'company_id' => $invoice->company_id,
+            'content' => "Facture N°{$invoice->invoice_number} envoyée au client par e-mail.",
+        ]);
+
+        return back()->with('success', 'Facture envoyée par e-mail au client.');
     }
 }

@@ -15,10 +15,10 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-    <AppShell variant="sidebar">
-        <AppSidebar />
-        <AppContent variant="sidebar" class="overflow-x-hidden">
-            <AppSidebarHeader :breadcrumbs="breadcrumbs" />
+    <AppShell variant="sidebar" class="print:block print:w-full print:m-0 print:p-0">
+        <AppSidebar class="print:hidden" />
+        <AppContent variant="sidebar" class="overflow-x-hidden print:!overflow-visible print:!p-0 print:!m-0 print:!w-full print:!block print:!border-none print:!shadow-none print:bg-white bg-transparent">
+            <AppSidebarHeader :breadcrumbs="breadcrumbs" class="print:hidden" />
             <slot />
         </AppContent>
     </AppShell>

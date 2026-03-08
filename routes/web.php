@@ -31,6 +31,9 @@ Route::post('devis/{uid}/respond', [\App\Http\Controllers\PublicQuoteController:
     ->middleware('throttle:10,1')
     ->name('quotes.public.respond');
 
+// Public invoice view (no auth required)
+Route::get('facture/{uid}', [\App\Http\Controllers\PublicInvoiceController::class, 'show'])->name('invoices.public.show');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('onboarding/company', [OnboardingController::class, 'create'])->name('onboarding.company.create');
     Route::post('onboarding/company', [OnboardingController::class, 'store'])->name('onboarding.company.store');
@@ -70,6 +73,7 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::get('invoices/{invoice}', [\App\Http\Controllers\InvoiceController::class, 'show'])->name('invoices.show');
     Route::patch('invoices/{invoice}/status', [\App\Http\Controllers\InvoiceController::class, 'updateStatus'])->name('invoices.update_status');
     Route::delete('invoices/{invoice}', [\App\Http\Controllers\InvoiceController::class, 'destroy'])->name('invoices.destroy');
+    Route::post('invoices/{invoice}/send', [\App\Http\Controllers\InvoiceController::class, 'sendEmail'])->name('invoices.send');
 
     Route::delete('widgets/{leadForm}', [WidgetController::class, 'destroy'])->name('widgets.destroy');
 });

@@ -270,12 +270,12 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
                 </div>
 
                 <!-- Footer / Legal Preview -->
-                <div class="bg-slate-900 p-8 text-center text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] space-y-1">
+                <div class="bg-slate-50 border-t border-slate-200 p-8 text-center text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] space-y-1">
                     <p>{{ t('invoices.thank_you') }}</p>
                     <p>{{ t('invoices.payment_terms') }}</p>
-                    <div v-if="settings.legal_mentions && settings.legal_mentions.length > 0" class="pt-4 mt-4 border-t border-slate-800 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[9px] font-medium opacity-80">
+                    <div v-if="settings.legal_mentions && settings.legal_mentions.length > 0" class="pt-4 mt-4 border-t border-slate-200 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[9px] font-medium opacity-80">
                         <span v-for="(mention, index) in settings.legal_mentions" :key="index">
-                            <span class="font-bold tracking-widest text-slate-400">{{ mention.key }}</span> : {{ mention.value }}
+                            <span class="font-bold tracking-widest text-slate-600">{{ mention.key }}</span> : {{ mention.value }}
                         </span>
                     </div>
                 </div>

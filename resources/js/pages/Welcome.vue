@@ -2,7 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { dashboard, login, register } from '@/routes';
-import { ArrowRight, BarChart3, Users, Zap, CheckCircle2, LayoutTemplate, Briefcase, Plus, Minus, ChevronDown } from 'lucide-vue-next';
+import { ArrowRight, BarChart3, Users, Zap, CheckCircle2, LayoutTemplate, Briefcase, Plus, Minus, ChevronDown, Receipt, ShieldCheck, Hammer, Heart, Building2, Home } from 'lucide-vue-next';
 
 withDefaults(
     defineProps<{
@@ -16,23 +16,23 @@ withDefaults(
 const faqs = [
     {
         question: "Qu'est-ce que Leadflow exactement ?",
-        answer: "Leadflow est une plateforme tout-en-un conçue pour les entreprises de services. Elle combine un générateur de formulaires pour capturer des prospects sur votre site web, un CRM simplifié pour les gérer, et un outil de devis pour finaliser vos ventes rapidement."
+        answer: "Leadflow est une plateforme tout-en-un conçue pour les entreprises de services. Elle combine un générateur de formulaires pour capturer des prospects, un CRM simplifié pour gérer les clients, et un outil de devis et facturation avec mentions légales configurables."
     },
     {
-        question: "Comment s'intègre le widget métier sur mon site ?",
-        answer: "C'est très simple ! Vous créez votre formulaire personnalisé dans Leadflow, et nous vous donnons un petit bout de code à copier-coller sur votre site (WordPress, Wix, Webflow, Shopify...). Le formulaire apparaîtra instantanément."
+        question: "Comment s'intègre le widget lead sur mon site ?",
+        answer: "C'est très simple ! Vous créez votre formulaire personnalisé dans Leadflow avec un système anti-spam invisible, et nous vous donnons un petit bout de code à copier-coller sur votre site (WordPress, Wix, Shopify...). Il apparaîtra instantanément."
     },
     {
-        question: "Est-ce difficile de créer et d'envoyer des devis ?",
-        answer: "Pas du tout ! Leadflow génère automatiquement un environnement sécurisé pour vos devis. Vous ajoutez vos lignes de services, les montants, et vous partagez un lien unique à votre prospect. Il peut l'accepter ou le refuser en ligne, directement depuis son téléphone ou son ordinateur."
+        question: "Est-ce difficile de créer des devis et factures ?",
+        answer: "Pas du tout ! Vous générez automatiquement des devis et factures professionnels avec calcul automatique des taxes. Les devis peuvent être partagés par lien sécurisé, et les factures disposent d'un design pensé pour l'impression propre (PDF) incluant vos mentions légales personnalisées."
     },
     {
-        question: "Que se passe-t-il après avoir capturé un lead ?",
-        answer: "Il apparaît immédiatement dans votre pipeline (Kanban). Vous recevez une notification, et vous pouvez alors le qualifier, ajouter des notes internes, et lui envoyer une soumission (devis) sans jamais quitter l'application."
+        question: "Puis-je gérer mes clients sur le long terme ?",
+        answer: "Oui, la gestion des clients est centralisée. Chaque client dispose d'une fiche contenant tous ses devis, toutes ses factures, ainsi qu'un système de notes internes et de suivi (Timeline) pour tout votre historique."
     },
     {
         question: "Ai-je besoin d'une carte de crédit pour essayer ?",
-        answer: "Non, aucune carte bancaire n'est requise. Vous disposez de 14 jours d'essai gratuit pour explorer toutes les fonctionnalités, créer vos widgets et tester la gestion de leads."
+        answer: "Non, aucune carte bancaire n'est requise. Vous disposez d'un essai gratuit pour explorer toutes nos fonctionnalités."
     }
 ];
 
@@ -97,14 +97,14 @@ const toggleFaq = (index: number) => {
                     <div class="mx-auto max-w-2xl text-center">
                         <div class="mb-8 flex justify-center">
                             <span class="relative rounded-full px-3 py-1 text-sm leading-6 text-slate-600 ring-1 ring-slate-900/10 hover:ring-slate-900/20 dark:text-slate-300 dark:ring-white/10 dark:hover:ring-white/20">
-                                Nouveau: Interface CRM repensée <a href="#" class="font-semibold text-indigo-600 dark:text-indigo-400"><span class="absolute inset-0" aria-hidden="true" />Voir la démo <span aria-hidden="true">&rarr;</span></a>
+                                Nouveau: Factures, Mentions Légales & CRM Client <a href="#features" class="font-semibold text-indigo-600 dark:text-indigo-400"><span class="absolute inset-0" aria-hidden="true" />Découvrir <span aria-hidden="true">&rarr;</span></a>
                             </span>
                         </div>
                         <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl dark:text-white">
-                            Transformez votre site en machine à générer des leads
+                            Le SaaS tout-en-un pour développer votre entreprise
                         </h1>
                         <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">
-                            Capturez des prospects avec un widget intelligent, gérez-les dans un CRM intuitif, envoyez des devis et facturez vos clients. Tout ça, au même endroit.
+                            Capturez des prospects, gérez vos contacts dans notre mini-CRM, éditez des devis avec signature en ligne et générez vos factures professionnelles en quelques clics.
                         </p>
                         <div class="mt-10 flex items-center justify-center gap-x-6">
                             <Link
@@ -205,16 +205,16 @@ const toggleFaq = (index: number) => {
                 </div>
                 
                 <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-                    <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+                    <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-12 lg:max-w-none lg:grid-cols-4">
                         <div class="flex flex-col">
                             <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900 dark:text-white">
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
                                     <LayoutTemplate class="h-6 w-6 text-white" aria-hidden="true" />
                                 </div>
-                                Widget LeadGen Personnalisé
+                                Widget LeadGen
                             </dt>
-                            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600 dark:text-slate-400">
-                                <p class="flex-auto">Créez des formulaires sur-mesure pour votre site web. Un bout de code à copier, et c'est en ligne.</p>
+                            <dd class="mt-4 flex flex-auto flex-col text-sm leading-7 text-slate-600 dark:text-slate-400">
+                                <p class="flex-auto">Créez des formulaires sur-mesure pour votre site web avec protection anti-spam invisible Honeypot intégrée.</p>
                             </dd>
                         </div>
                         <div class="flex flex-col">
@@ -222,10 +222,10 @@ const toggleFaq = (index: number) => {
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
                                     <Users class="h-6 w-6 text-white" aria-hidden="true" />
                                 </div>
-                                Mini CRM Intégré
+                                CRM Complet
                             </dt>
-                            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600 dark:text-slate-400">
-                                <p class="flex-auto">Oubliez les emails perdus et les post-its. Gérez vos opportunités à travers un processus visuel (Kanban) simple et ordonné.</p>
+                            <dd class="mt-4 flex flex-auto flex-col text-sm leading-7 text-slate-600 dark:text-slate-400">
+                                <p class="flex-auto">Gérez opportunités et fiches clients. Ajoutez des notes, suivez la timeline d'activité (appels, emails, RDV) dans une interface ultra fluide.</p>
                             </dd>
                         </div>
                         <div class="flex flex-col">
@@ -233,10 +233,21 @@ const toggleFaq = (index: number) => {
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
                                     <Briefcase class="h-6 w-6 text-white" aria-hidden="true" />
                                 </div>
-                                Devis & Facturation
+                                Devis Visuels
                             </dt>
-                            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600 dark:text-slate-400">
-                                <p class="flex-auto">Envoyez des soumissions professionnelles en un clic, directement depuis la fiche de votre lead. Convertissez-les en factures sans perte de temps.</p>
+                            <dd class="mt-4 flex flex-auto flex-col text-sm leading-7 text-slate-600 dark:text-slate-400">
+                                <p class="flex-auto">Générez des liens publics uniques pour vos devis. Vos clients peuvent accepter ou refuser l'offre en direct sans friction.</p>
+                            </dd>
+                        </div>
+                        <div class="flex flex-col">
+                            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900 dark:text-white">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
+                                    <Receipt class="h-6 w-6 text-white" aria-hidden="true" />
+                                </div>
+                                Facturation
+                            </dt>
+                            <dd class="mt-4 flex flex-auto flex-col text-sm leading-7 text-slate-600 dark:text-slate-400">
+                                <p class="flex-auto">Éditez des factures multilingues avec rendu "Prêt à imprimer" intégrant vos taux de taxes personnalisés et toutes vos mentions légales dynamiques.</p>
                             </dd>
                         </div>
                     </dl>
@@ -244,8 +255,72 @@ const toggleFaq = (index: number) => {
             </div>
         </div>
 
+        <!-- Target Audience Section -->
+        <div class="py-24 sm:py-32 relative overflow-hidden bg-slate-50 dark:bg-slate-950">
+            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+            <div class="mx-auto max-w-7xl px-6 lg:px-8 relative">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h2 class="text-base font-semibold leading-7 text-indigo-600 dark:text-indigo-400">À qui s'adresse Leadflow ?</h2>
+                    <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">Conçu pour ceux qui font grandir leur activité</p>
+                    <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">Que vous soyez artisan, agence ou prestataire de services, Leadflow s'adapte à votre manière de travailler pour vous aider à convertir plus de prospects.</p>
+                </div>
+                
+                <div class="mx-auto mt-16 max-w-7xl">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <!-- Card 1 -->
+                        <div class="group relative bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-xl hover:border-indigo-500/30 transition-all duration-300 hover:-translate-y-2 overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-transparent dark:from-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="relative">
+                                <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <Hammer class="w-7 h-7" />
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Construction & Bâtiment</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Plombiers, électriciens, menuisiers, paysagistes... Gérez vos demandes d'intervention et envoyez rapidement vos devis directement depuis votre camion.</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="group relative bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-xl hover:border-rose-500/30 transition-all duration-300 hover:-translate-y-2 overflow-hidden lg:translate-y-8">
+                            <div class="absolute inset-0 bg-gradient-to-br from-rose-50/50 to-transparent dark:from-rose-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="relative">
+                                <div class="w-14 h-14 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <Heart class="w-7 h-7" />
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Esthétique & Bien-être</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Centres esthétiques, spas, massothérapeutes... Récupérez les informations de vos (futurs) clients en ligne et organisez vos rendez-vous.</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="group relative bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-xl hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-2 overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="relative">
+                                <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <Building2 class="w-7 h-7" />
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Service B2B & Agences</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Agences web, comptables, consultants... Captez des leads qualifiés via votre site, qualifiez-les, et éditez des factures professionnelles à votre image.</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 4 -->
+                        <div class="group relative bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-xl hover:border-amber-500/30 transition-all duration-300 hover:-translate-y-2 overflow-hidden lg:translate-y-8">
+                            <div class="absolute inset-0 bg-gradient-to-br from-amber-50/50 to-transparent dark:from-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="relative">
+                                <div class="w-14 h-14 bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <Home class="w-7 h-7" />
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Services à domicile</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Entretien ménager, garde d'enfants, dératisation, services d'aide... Transformez chaque visite de votre site web en une vraie demande d'intervention.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- FAQ Section -->
-        <div class="bg-slate-50 py-24 sm:py-32 dark:bg-slate-950">
+        <div class="bg-white py-24 sm:py-32 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800/50">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
                 <div class="mx-auto max-w-4xl divide-y divide-slate-900/10 dark:divide-white/10">
                     <h2 class="text-2xl font-bold leading-10 tracking-tight text-slate-900 dark:text-white mb-8">

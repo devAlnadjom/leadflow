@@ -15,7 +15,8 @@ import {
     Calendar,
     Mail,
     Phone,
-    MapPin
+    ExternalLink,
+    Eye
 } from 'lucide-vue-next';
 import { useI18n } from '@/composables/useI18n';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -96,6 +97,27 @@ const updateStatus = (status: string) => {
 const formatDate = (date: string) => new Date(date).toLocaleDateString('fr-FR');
 const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(val);
 
+const publicUrl = computed(() => `${globalThis.location?.origin ?? ''}/facture/${props.invoice.public_uid}`);
+
+const openPreview = () => {
+    window.open(publicUrl.value, '_blank');
+};
+
+import { ref } from 'vue';
+const sendingEmail = ref(false);
+
+const sendEmail = () => {
+    if (confirm('Voulez-vous envoyer cette facture par e-mail au client ?')) {
+        sendingEmail.value = true;
+        router.post(`/invoices/${props.invoice.id}/send`, {}, {
+            preserveScroll: true,
+            onFinish: () => {
+                sendingEmail.value = false;
+            }
+        });
+    }
+};
+
 </script>
 
 <template>
@@ -131,12 +153,20 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
                         </DropdownMenuContent>
                     </DropdownMenu>
 
+                    <Button variant="outline" class="gap-2" @click="openPreview">
+                        <Eye class="w-4 h-4" /> Prévisualiser
+                    </Button>
                     <Button variant="outline" class="gap-2" @click="window.print()">
                         <Printer class="w-4 h-4" /> {{ t('invoices.print') }}
                     </Button>
                     
-                    <Button v-if="invoice.status === 'draft'" class="bg-indigo-600 hover:bg-indigo-700 gap-2" @click="updateStatus('sent')">
-                        <Send class="w-4 h-4" /> {{ t('invoices.finalize_send') }}
+                    <Button 
+                        v-if="invoice.status === 'draft' || invoice.status === 'sent'" 
+                        :disabled="sendingEmail"
+                        class="bg-indigo-600 hover:bg-indigo-700 gap-2" 
+                        @click="sendEmail"
+                    >
+                        <Send class="w-4 h-4" /> {{ sendingEmail ? 'Envoi...' : (invoice.status === 'draft' ? t('invoices.finalize_send') : 'Envoyer par e-mail') }}
                     </Button>
                 </div>
             </div>
@@ -288,12 +318,12 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
                 </div>
 
                 <!-- Footer / Legal -->
-                <div class="bg-slate-900 p-8 text-center text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] space-y-1">
+                <div class="bg-slate-50 border-t border-slate-200 p-8 text-center text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] space-y-1">
                     <p>{{ t('invoices.thank_you') }}</p>
                     <p>{{ t('invoices.payment_terms') }}</p>
-                    <div v-if="settings.legal_mentions && settings.legal_mentions.length > 0" class="pt-4 mt-4 border-t border-slate-800 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[9px] font-medium opacity-80">
+                    <div v-if="settings.legal_mentions && settings.legal_mentions.length > 0" class="pt-4 mt-4 border-t border-slate-200 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[9px] font-medium opacity-80">
                         <span v-for="(mention, index) in settings.legal_mentions" :key="index">
-                            <span class="font-bold tracking-widest text-slate-400">{{ mention.key }}</span> : {{ mention.value }}
+                            <span class="font-bold tracking-widest text-slate-600">{{ mention.key }}</span> : {{ mention.value }}
                         </span>
                     </div>
                 </div>
@@ -301,26 +331,3 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
         </div>
     </AppLayout>
 </template>
-
-<style>
-@media print {
-    body * {
-        visibility: hidden;
-    }
-    #print-area, #print-area * {
-        visibility: visible;
-    }
-    #print-area {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100vw;
-        max-width: 100%;
-        margin: 0;
-        padding: 0;
-    }
-    @page {
-        margin: 0.5cm;
-    }
-}
-</style>
