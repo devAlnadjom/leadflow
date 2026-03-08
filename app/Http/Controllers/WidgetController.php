@@ -107,8 +107,20 @@ class WidgetController extends Controller
         }
 
         var type = field.type === 'email' || field.type === 'tel' ? field.type : 'text';
+        var extraAttrs = '';
+        if (field.type === 'email') {
+            extraAttrs = ' autocomplete="email" inputmode="email"';
+        } else if (field.type === 'tel') {
+            extraAttrs = ' autocomplete="tel" inputmode="tel"';
+        } else if (field.type === 'text') {
+            var lbl = (field.label || '').toLowerCase();
+            if (lbl.indexOf('name') !== -1 || lbl.indexOf('nom') !== -1) {
+                extraAttrs = ' autocomplete="name"';
+            }
+        }
+
         return '<div style="margin-bottom:10px;">' + label
-            + '<input type="' + type + '" name="' + key + '" ' + requiredAttr + ' placeholder="' + escapeHtml(field.placeholder || '') + '" style="width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:8px;font-size:14px;box-sizing:border-box;">'
+            + '<input type="' + type + '" name="' + key + '" ' + requiredAttr + extraAttrs + ' placeholder="' + escapeHtml(field.placeholder || '') + '" style="width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:8px;font-size:14px;box-sizing:border-box;">'
             + '</div>';
     }
 
@@ -218,6 +230,11 @@ class WidgetController extends Controller
             payload[field.field_key] = state.values[field.field_key];
         });
 
+        var hp = form.querySelector('[name="_leadflow_email"]');
+        if (hp) {
+            payload['_leadflow_email'] = hp.value;
+        }
+
         return payload;
     }
 
@@ -270,6 +287,7 @@ class WidgetController extends Controller
                     + (allFields.length === 0
                         ? '<p style="margin:8px 0 0;color:#64748b;font-size:13px;">No fields configured for this widget.</p>'
                         : '<form id="leadflow-widget-form-' + uid + '">'
+                        + '<div style="position:absolute;left:-9999px;top:-9999px;"><label for="leadflow-hp-' + uid + '">Leave this field empty</label><input type="text" id="leadflow-hp-' + uid + '" name="_leadflow_email" tabindex="-1" autocomplete="off"></div>'
                         + fieldsHtml
                         + sliderNavigationHtml
                         + ((layoutMode === 'stack' || isLastStep)
@@ -636,6 +654,7 @@ JS;
         }
 
         $form->records()->create([
+            'company_id' => $form->company_id,
             'name' => $capturedName,
             'email' => $capturedEmail,
             'phone' => $capturedPhone,
@@ -662,6 +681,12 @@ JS;
 
         /** @var array<string, mixed> $data */
         $data = $request->input('data', []);
+
+        if (!empty($data['_leadflow_email'])) {
+            return response()->json([
+                'status' => 'ok',
+            ]);
+        }
 
         $rules = [];
 
@@ -703,6 +728,7 @@ JS;
         }
 
         $form->records()->create([
+            'company_id' => $form->company_id,
             'name' => $capturedName,
             'email' => $capturedEmail,
             'phone' => $capturedPhone,

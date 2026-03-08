@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class LeadForm extends Model
 {
     /** @use HasFactory<\Database\Factories\LeadFormFactory> */
-    use HasFactory;
+    use HasFactory, \App\Models\Traits\BelongsToCompany;
 
     /**
      * The attributes that are mass assignable.

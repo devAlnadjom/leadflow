@@ -58,7 +58,10 @@ class OnboardingController extends Controller
                 'company_id' => $company->id,
                 'quote_prefix' => strtoupper($validated['quote_prefix']),
                 'invoice_prefix' => strtoupper($validated['invoice_prefix']),
-                'default_tax_rate' => $validated['default_tax_rate'] ?? null,
+                'tax1_name' => $validated['tax1_name'] ?? 'TPS',
+                'tax1_rate' => $validated['tax1_rate'] ?? 5.000,
+                'tax2_name' => $validated['tax2_name'] ?? 'TVQ',
+                'tax2_rate' => $validated['tax2_rate'] ?? 9.975,
                 'currency' => strtoupper($validated['currency']),
                 'terms_and_conditions' => $validated['terms_and_conditions'] ?? null,
             ]);

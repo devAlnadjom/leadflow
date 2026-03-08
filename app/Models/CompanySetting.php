@@ -19,7 +19,10 @@ class CompanySetting extends Model
         'company_id',
         'quote_prefix',
         'invoice_prefix',
-        'default_tax_rate',
+        'tax1_name',
+        'tax1_rate',
+        'tax2_name',
+        'tax2_rate',
         'currency',
         'terms_and_conditions',
     ];

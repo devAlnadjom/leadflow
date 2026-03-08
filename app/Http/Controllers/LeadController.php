@@ -50,6 +50,8 @@ class LeadController extends Controller
                 'email' => $record->email,
                 'phone' => $record->phone,
                 'source' => $record->source,
+                'status' => $record->status ?? 'new',
+                'value' => $record->value ?? 0,
                 'created_at' => $record->created_at?->toDateTimeString(),
             ]);
 
@@ -112,6 +114,7 @@ class LeadController extends Controller
     public function show(Request $request, int $lead): Response
     {
         $record = $this->resolveCompanyLead($request, $lead);
+        $record->load(['notes.user:id,name', 'quotes']);
 
         return Inertia::render('leads/Show', [
             'lead' => [
@@ -122,9 +125,26 @@ class LeadController extends Controller
                 'email' => $record->email,
                 'phone' => $record->phone,
                 'source' => $record->source,
+                'status' => $record->status ?? 'new',
+                'value' => $record->value ?? 0,
                 'payload' => $record->payload ?? [],
                 'created_at' => $record->created_at?->toDateTimeString(),
                 'updated_at' => $record->updated_at?->toDateTimeString(),
+                'notes' => $record->notes->map(fn ($note) => [
+                    'id' => $note->id,
+                    'content' => $note->content,
+                    'author' => $note->user?->name ?? 'Système',
+                    'created_at' => $note->created_at?->toDateTimeString(),
+                ]),
+                'quotes' => $record->quotes->map(fn ($quote) => [
+                    'id' => $quote->id,
+                    'public_uid' => $quote->public_uid,
+                    'quote_number' => $quote->quote_number,
+                    'status' => $quote->status,
+                    'total' => $quote->total,
+                    'expire_at' => $quote->expire_at?->toDateString(),
+                    'created_at' => $quote->created_at?->toDateTimeString(),
+                ]),
             ],
         ]);
     }
@@ -198,5 +218,24 @@ class LeadController extends Controller
             ->whereKey($leadId)
             ->whereHas('leadForm', fn ($query) => $query->where('company_id', $request->user()->company_id))
             ->firstOrFail();
+    }
+
+    /**
+     * Update the status of a lead via API/Kanban.
+     */
+    public function updateStatus(Request $request, int $lead): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:new,contacted,qualified,won,lost'],
+        ]);
+
+        $record = LeadRecord::query()
+            ->whereKey($lead)
+            ->whereHas('leadForm', fn ($query) => $query->where('company_id', $request->user()->company_id))
+            ->firstOrFail();
+
+        $record->update(['status' => $validated['status']]);
+
+        return back();
     }
 }
