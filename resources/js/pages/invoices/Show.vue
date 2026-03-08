@@ -142,7 +142,7 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
             </div>
 
             <!-- Invoice Document -->
-            <div class="bg-white shadow-xl border border-slate-200 rounded-2xl overflow-hidden print:shadow-none print:border-none">
+            <div id="print-area" class="bg-white shadow-xl border border-slate-200 rounded-2xl overflow-hidden print:shadow-none print:border-none">
                 <!-- Header / Logo -->
                 <div class="p-8 sm:p-12 border-b border-slate-100 flex flex-col sm:flex-row justify-between gap-8">
                     <div>
@@ -304,7 +304,23 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
 
 <style>
 @media print {
-    body { background-color: white !important; }
-    .AppLayout_main { padding: 0 !important; }
+    body * {
+        visibility: hidden;
+    }
+    #print-area, #print-area * {
+        visibility: visible;
+    }
+    #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    @page {
+        margin: 0.5cm;
+    }
 }
 </style>
