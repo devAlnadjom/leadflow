@@ -15,6 +15,7 @@ import {
     AlertCircle,
     Briefcase
 } from 'lucide-vue-next';
+import { useI18n } from '@/composables/useI18n';
 import Heading from '@/components/Heading.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
@@ -58,8 +59,10 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const { t } = useI18n();
+
 const breadcrumbs = computed<BreadcrumbItem[]>(() => [
-    { title: 'Factures', href: '/invoices' },
+    { title: t('invoices.title'), href: '/invoices' },
 ]);
 
 const filterState = reactive({
@@ -81,18 +84,18 @@ const clearFilters = (): void => {
 };
 
 const removeInvoice = (id: number): void => {
-    if (confirm('Voulez-vous vraiment supprimer cette facture ?')) {
+    if (confirm(t('invoices.delete_confirm'))) {
         router.delete(`/invoices/${id}`);
     }
 };
 
-const statuses = [
-    { id: 'draft', label: 'Brouillon', icon: Inbox, color: 'bg-slate-100 text-slate-600 border-slate-200' },
-    { id: 'sent', label: 'Envoyée', icon: Clock, color: 'bg-blue-100 text-blue-700 border-blue-200' },
-    { id: 'paid', label: 'Payée', icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-    { id: 'overdue', label: 'En retard', icon: AlertCircle, color: 'bg-red-100 text-red-700 border-red-200' },
-    { id: 'cancelled', label: 'Annulée', icon: Ban, color: 'bg-slate-100 text-slate-400 border-slate-200' },
-];
+const statuses = computed(() => [
+    { id: 'draft', label: t('invoices.status_draft'), icon: Inbox, color: 'bg-slate-100 text-slate-600 border-slate-200' },
+    { id: 'sent', label: t('invoices.status_sent'), icon: Clock, color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    { id: 'paid', label: t('invoices.status_paid'), icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+    { id: 'overdue', label: t('invoices.status_overdue'), icon: AlertCircle, color: 'bg-red-100 text-red-700 border-red-200' },
+    { id: 'cancelled', label: t('invoices.status_cancelled'), icon: Ban, color: 'bg-slate-100 text-slate-400 border-slate-200' },
+]);
 
 const getInvoicesByStatus = (statusId: string) => {
     return props.invoices.data.filter(i => i.status === statusId);
@@ -111,14 +114,14 @@ const totalAmount = computed(() => {
 </script>
 
 <template>
-    <Head title="Factures" />
+    <Head :title="t('invoices.title')" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-5 p-4 md:p-6 lg:p-8 bg-slate-50">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-slate-900 font-bold">
                 <Heading
-                    title="Facturation"
-                    description="Gérez vos factures, suivez les paiements et relancez les retards."
+                    :title="t('invoices.billing')"
+                    :description="t('invoices.billing_desc')"
                 />
             </div>
 
@@ -151,7 +154,7 @@ const totalAmount = computed(() => {
                     <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                         v-model="filterState.search"
-                        placeholder="Rechercher par numéro de facture, client..."
+                        :placeholder="t('invoices.search_placeholder')"
                         class="pl-9 h-10 w-full"
                     />
                 </div>
@@ -161,16 +164,16 @@ const totalAmount = computed(() => {
                         v-model="filterState.status"
                         class="h-10 px-3 py-2 rounded-md border border-input bg-background text-sm shadow-sm hover:bg-accent hover:text-accent-foreground outline-none text-slate-800"
                     >
-                        <option value="">Tous les statuts</option>
+                        <option value="">{{ t('invoices.all_statuses') }}</option>
                         <option v-for="s in statuses" :key="s.id" :value="s.id">{{ s.label }}</option>
                     </select>
 
                     <Button type="submit" variant="secondary" class="h-10">
-                        Filtrer
+                        {{ t('invoices.filter') }}
                     </Button>
 
                     <Button type="button" variant="ghost" @click="clearFilters" class="h-10 text-slate-500">
-                        Effacer
+                        {{ t('invoices.clear') }}
                     </Button>
                 </div>
             </form>
@@ -181,12 +184,12 @@ const totalAmount = computed(() => {
                     <table class="w-full text-sm text-left">
                         <thead class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-medium whitespace-nowrap">
                             <tr>
-                                <th class="px-4 py-3">Facture</th>
-                                <th class="px-4 py-3">Client</th>
-                                <th class="px-4 py-3">Statut</th>
-                                <th class="px-4 py-3 text-right">Montant</th>
-                                <th class="px-4 py-3">Échéance</th>
-                                <th class="px-4 py-3 text-right">Actions</th>
+                                <th class="px-4 py-3">{{ t('invoices.invoice') }}</th>
+                                <th class="px-4 py-3">{{ t('invoices.client') }}</th>
+                                <th class="px-4 py-3">{{ t('invoices.status') }}</th>
+                                <th class="px-4 py-3 text-right">{{ t('invoices.amount') }}</th>
+                                <th class="px-4 py-3">{{ t('invoices.due_date') }}</th>
+                                <th class="px-4 py-3 text-right">{{ t('invoices.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -197,10 +200,10 @@ const totalAmount = computed(() => {
                                             <FileText class="w-7 h-7" />
                                         </div>
                                         <p class="text-slate-500 text-sm">
-                                            {{ (filterState.search || filterState.status) ? 'Aucune facture ne correspond à vos filtres.' : 'Aucune facture pour le moment.' }}
+                                            {{ (filterState.search || filterState.status) ? t('invoices.no_matches') : t('invoices.none') }}
                                         </p>
                                         <Button v-if="filterState.search || filterState.status" variant="outline" size="sm" @click="clearFilters" class="gap-1.5">
-                                            <XCircle class="w-3.5 h-3.5" /> Effacer les filtres
+                                            <XCircle class="w-3.5 h-3.5" /> {{ t('invoices.clear_filters') }}
                                         </Button>
                                     </div>
                                 </td>
@@ -245,14 +248,14 @@ const totalAmount = computed(() => {
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuItem asChild>
-                                                <Link :href="`/invoices/${invoice.id}`">Voir la facture</Link>
+                                                <Link :href="`/invoices/${invoice.id}`">{{ t('invoices.view_invoice') }}</Link>
                                             </DropdownMenuItem>
                                             <DropdownMenuItem v-if="invoice.client_id" asChild>
-                                                <Link :href="`/clients/${invoice.client_id}`">Voir le client</Link>
+                                                <Link :href="`/clients/${invoice.client_id}`">{{ t('invoices.view_client') }}</Link>
                                             </DropdownMenuItem>
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem class="text-red-600 focus:bg-red-50 focus:text-red-700" @click="removeInvoice(invoice.id)">
-                                                Supprimer
+                                                {{ t('invoices.delete') }}
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
@@ -266,9 +269,9 @@ const totalAmount = computed(() => {
             <!-- Pagination -->
             <div class="flex items-center justify-between mt-auto bg-white p-3 rounded-lg border border-slate-200">
                 <span class="text-sm text-muted-foreground hidden sm:inline-block">
-                    {{ invoices.data.length }} factures affichées
+                    {{ invoices.data.length }} {{ t('invoices.displayed') }}
                     <span v-if="totalAmount > 0" class="ml-2 font-semibold text-slate-700">
-                        · Total: {{ totalAmount.toFixed(2) }}€
+                        · {{ t('invoices.total') }}: {{ totalAmount.toFixed(2) }}€
                     </span>
                 </span>
                 <div class="flex flex-wrap items-center gap-1 ml-auto">

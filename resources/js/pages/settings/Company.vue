@@ -26,6 +26,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Plus, Trash2 } from 'lucide-vue-next';
+import { toast } from 'vue-sonner';
 
 type CompanyPayload = {
     name: string;
@@ -48,6 +50,7 @@ type CompanySettingsPayload = {
     tax2_rate: number | null;
     currency: string;
     terms_and_conditions: string | null;
+    legal_mentions: { key: string; value: string }[];
 };
 
 type Props = {
@@ -68,6 +71,15 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => [
 ]);
 
 const servedAreasRef = ref(props.servedAreas);
+const legalMentionsRef = ref<{ key: string; value: string }[]>(Array.isArray(props.settings.legal_mentions) ? props.settings.legal_mentions : []);
+
+const addLegalMention = () => {
+    legalMentionsRef.value.push({ key: '', value: '' });
+};
+
+const removeLegalMention = (index: number) => {
+    legalMentionsRef.value.splice(index, 1);
+};
 </script>
 
 <template>
@@ -103,9 +115,11 @@ const servedAreasRef = ref(props.servedAreas);
                                 data.tax2_rate === null
                                     ? null
                                     : Number(data.tax2_rate),
+                            legal_mentions: legalMentionsRef.filter(m => (m.key?.trim() !== '' || m.value?.trim() !== '')),
                         })
                     "
                     class="space-y-6"
+                    @success="() => toast(t('common.saved'))"
                     v-slot="{ errors, processing, recentlySuccessful }"
                 >
                     <div class="grid gap-2">
@@ -406,6 +420,25 @@ const servedAreasRef = ref(props.servedAreas);
                             :value="settings.terms_and_conditions ?? ''"
                         />
                         <InputError :message="errors.terms_and_conditions" />
+                    </div>
+
+                    <div class="grid gap-2 border-t pt-6">
+                        <Label>Mentions légales (Afffichées sur les factures et devis)</Label>
+                        <p class="text-sm text-muted-foreground">Ajoutez les informations légales requises dans votre pays (ex: SIRET, RCS, Numéro T.V.A., etc.)</p>
+                        
+                        <div class="space-y-3 mt-2">
+                            <div v-for="(mention, index) in legalMentionsRef" :key="index" class="flex items-center gap-3">
+                                <Input v-model="mention.key" placeholder="Nom (ex: SIRET)" class="w-1/3" />
+                                <Input v-model="mention.value" placeholder="Valeur (ex: 123 456 789)" class="flex-1" />
+                                <Button type="button" variant="ghost" size="icon" @click="removeLegalMention(index)" class="text-red-500 hover:text-red-700 hover:bg-red-50">
+                                    <Trash2 class="w-4 h-4" />
+                                </Button>
+                            </div>
+                            <Button type="button" variant="outline" size="sm" @click="addLegalMention" class="gap-2 w-full sm:w-auto mt-2">
+                                <Plus class="w-4 h-4" /> Ajouter une mention légale
+                            </Button>
+                        </div>
+                        <InputError :message="errors.legal_mentions" />
                     </div>
 
                     <div class="flex items-center gap-4">

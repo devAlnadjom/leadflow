@@ -42,6 +42,9 @@ class CompanySettingsUpdateRequest extends FormRequest
             'tax2_rate' => ['nullable', 'numeric', 'between:0,100'],
             'currency' => ['required', 'string', 'size:3'],
             'terms_and_conditions' => ['nullable', 'string', 'max:5000'],
+            'legal_mentions' => ['nullable', 'array', 'max:10'],
+            'legal_mentions.*.key' => ['required_with:legal_mentions', 'string', 'max:50'],
+            'legal_mentions.*.value' => ['required_with:legal_mentions', 'string', 'max:150'],
         ];
     }
 

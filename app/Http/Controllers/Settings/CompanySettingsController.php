@@ -107,6 +107,7 @@ class CompanySettingsController extends Controller
                 'tax2_rate' => $validated['tax2_rate'] ?? 9.975,
                 'currency' => strtoupper($validated['currency']),
                 'terms_and_conditions' => $validated['terms_and_conditions'] ?? null,
+                'legal_mentions' => $validated['legal_mentions'] ?? [],
             ],
         );
 

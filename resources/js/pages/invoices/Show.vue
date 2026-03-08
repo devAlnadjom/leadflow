@@ -17,6 +17,7 @@ import {
     Phone,
     MapPin
 } from 'lucide-vue-next';
+import { useI18n } from '@/composables/useI18n';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -65,23 +66,26 @@ interface Props {
         tax1_name: string;
         tax2_name: string;
         currency: string;
+        legal_mentions?: { key: string; value: string }[];
     };
 }
 
 const props = defineProps<Props>();
 
+const { t } = useI18n();
+
 const breadcrumbs = computed<BreadcrumbItem[]>(() => [
-    { title: 'Factures', href: '/invoices' },
+    { title: t('invoices.title'), href: '/invoices' },
     { title: props.invoice.invoice_number, href: `/invoices/${props.invoice.id}` },
 ]);
 
-const statuses = {
-    draft: { label: 'Brouillon', icon: Clock, color: 'bg-slate-100 text-slate-600 border-slate-200' },
-    sent: { label: 'Envoyée', icon: Send, color: 'bg-blue-100 text-blue-700 border-blue-200' },
-    paid: { label: 'Payée', icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-    overdue: { label: 'En retard', icon: AlertCircle, color: 'bg-red-100 text-red-700 border-red-200' },
-    cancelled: { label: 'Annulée', icon: Ban, color: 'bg-slate-100 text-slate-400 border-slate-200' },
-};
+const statuses = computed(() => ({
+    draft: { label: t('invoices.status_draft'), icon: Clock, color: 'bg-slate-100 text-slate-600 border-slate-200' },
+    sent: { label: t('invoices.status_sent'), icon: Send, color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    paid: { label: t('invoices.status_paid'), icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+    overdue: { label: t('invoices.status_overdue'), icon: AlertCircle, color: 'bg-red-100 text-red-700 border-red-200' },
+    cancelled: { label: t('invoices.status_cancelled'), icon: Ban, color: 'bg-slate-100 text-slate-400 border-slate-200' },
+}));
 
 const updateStatus = (status: string) => {
     router.patch(`/invoices/${props.invoice.id}/status`, { status }, {
@@ -95,7 +99,7 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
 </script>
 
 <template>
-    <Head :title="'Facture ' + invoice.invoice_number" />
+    <Head :title="t('invoices.invoice') + ' ' + invoice.invoice_number" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -106,8 +110,8 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
                         <ChevronLeft class="w-6 h-6" />
                     </Link>
                     <div>
-                        <h1 class="text-2xl font-bold text-slate-900 leading-tight">Facture {{ invoice.invoice_number }}</h1>
-                        <p class="text-sm text-slate-500 mt-1">Émise le {{ formatDate(invoice.issue_date) }}</p>
+                        <h1 class="text-2xl font-bold text-slate-900 leading-tight">{{ t('invoices.invoice') }} {{ invoice.invoice_number }}</h1>
+                        <p class="text-sm text-slate-500 mt-1">{{ t('invoices.issued_at') }} {{ formatDate(invoice.issue_date) }}</p>
                     </div>
                 </div>
                 
@@ -128,11 +132,11 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
                     </DropdownMenu>
 
                     <Button variant="outline" class="gap-2" @click="window.print()">
-                        <Printer class="w-4 h-4" /> Imprimer
+                        <Printer class="w-4 h-4" /> {{ t('invoices.print') }}
                     </Button>
                     
                     <Button v-if="invoice.status === 'draft'" class="bg-indigo-600 hover:bg-indigo-700 gap-2" @click="updateStatus('sent')">
-                        <Send class="w-4 h-4" /> Finaliser & Envoyer
+                        <Send class="w-4 h-4" /> {{ t('invoices.finalize_send') }}
                     </Button>
                 </div>
             </div>
@@ -151,14 +155,14 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
                     
                     <div class="text-left sm:text-right">
                         <div class="inline-block px-4 py-2 bg-slate-50 rounded-xl border border-slate-100 mb-4">
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Status de paiement</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">{{ t('invoices.payment_status') }}</span>
                             <Badge :variant="invoice.status === 'paid' ? 'default' : 'secondary'" 
                                    :class="invoice.status === 'paid' ? 'bg-emerald-500 hover:bg-emerald-500' : 'bg-amber-100 text-amber-700 hover:bg-amber-100'">
                                 {{ statuses[invoice.status].label.toUpperCase() }}
                             </Badge>
                         </div>
                         <div class="space-y-1">
-                            <p class="text-slate-900 font-black text-2xl tracking-tight">FACTURE</p>
+                            <p class="text-slate-900 font-black text-2xl tracking-tight">{{ t('invoices.invoice') }}</p>
                             <p class="text-indigo-600 font-mono font-bold">{{ invoice.invoice_number }}</p>
                         </div>
                     </div>
@@ -168,9 +172,9 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12 p-8 sm:p-12 bg-white">
                     <div class="space-y-6">
                         <div>
-                            <span class="text-[11px] font-black uppercase tracking-widest text-indigo-500 block mb-3">Émis par</span>
+                            <span class="text-[11px] font-black uppercase tracking-widest text-indigo-500 block mb-3">{{ t('invoices.issued_by') }}</span>
                             <div class="space-y-1 text-slate-600">
-                                <p class="font-bold text-slate-900 text-lg">Votre Entreprise</p>
+                                <p class="font-bold text-slate-900 text-lg">{{ t('invoices.your_company') }}</p>
                                 <p>123 Avenue du Success</p>
                                 <p>75001 Paris, France</p>
                                 <p class="text-sm pt-2 flex items-center gap-2"><Mail class="w-3.5 h-3.5" /> hello@leadflow.test</p>
@@ -180,7 +184,7 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
 
                     <div class="space-y-6">
                         <div>
-                            <span class="text-[11px] font-black uppercase tracking-widest text-indigo-500 block mb-3">Facturer à</span>
+                            <span class="text-[11px] font-black uppercase tracking-widest text-indigo-500 block mb-3">{{ t('invoices.bill_to') }}</span>
                             <div class="space-y-1 text-slate-600">
                                 <Link :href="`/clients/${invoice.client.id}`" class="font-bold text-slate-900 text-lg hover:text-indigo-600 transition-colors block">
                                     {{ invoice.client.name }}
@@ -204,7 +208,7 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
                             <Calendar class="w-5 h-5 text-slate-400" />
                         </div>
                         <div>
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Date d'émission</p>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ t('invoices.issue_date') }}</p>
                             <p class="font-bold text-slate-700">{{ formatDate(invoice.issue_date) }}</p>
                         </div>
                     </div>
@@ -213,7 +217,7 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
                             <Clock class="w-5 h-5 text-indigo-400" />
                         </div>
                         <div>
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Date d'échéance</p>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ t('invoices.due_date') }}</p>
                             <p class="font-bold text-slate-700">{{ formatDate(invoice.due_date) }}</p>
                         </div>
                     </div>
@@ -223,7 +227,7 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
                             <FileText class="w-5 h-5 text-indigo-600" />
                         </div>
                         <div>
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total à payer</p>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ t('invoices.total') }}</p>
                             <p class="font-black text-indigo-600 text-xl">{{ formatCurrency(invoice.total) }}</p>
                         </div>
                     </div>
@@ -234,10 +238,10 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
                     <table class="w-full text-sm border-collapse">
                         <thead>
                             <tr class="border-b-2 border-slate-900">
-                                <th class="py-4 text-left font-black uppercase tracking-widest text-[10px] text-slate-400">Désignation</th>
-                                <th class="py-4 text-center font-black uppercase tracking-widest text-[10px] text-slate-400">Qté</th>
-                                <th class="py-4 text-right font-black uppercase tracking-widest text-[10px] text-slate-400">Prix Unit. HT</th>
-                                <th class="py-4 text-right font-black uppercase tracking-widest text-[10px] text-slate-400">Total HT</th>
+                                <th class="py-4 text-left font-black uppercase tracking-widest text-[10px] text-slate-400">{{ t('invoices.description_col') }}</th>
+                                <th class="py-4 text-center font-black uppercase tracking-widest text-[10px] text-slate-400">{{ t('invoices.qty') }}</th>
+                                <th class="py-4 text-right font-black uppercase tracking-widest text-[10px] text-slate-400">{{ t('invoices.unit_price') }}</th>
+                                <th class="py-4 text-right font-black uppercase tracking-widest text-[10px] text-slate-400">{{ t('invoices.total_ht') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -254,14 +258,14 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
                             <tr>
                                 <td colspan="3" class="py-12 pr-12">
                                     <div v-if="invoice.notes" class="p-6 rounded-2xl bg-amber-50/50 border border-amber-100 text-slate-600 text-xs italic space-y-2">
-                                        <p class="font-bold uppercase tracking-widest text-[9px] text-amber-600 not-italic">Notes complémentaires</p>
+                                        <p class="font-bold uppercase tracking-widest text-[9px] text-amber-600 not-italic">{{ t('invoices.notes_title') }}</p>
                                         {{ invoice.notes }}
                                     </div>
                                 </td>
                                 <td colspan="2" class="py-12">
                                     <div class="space-y-3">
                                         <div class="flex justify-between items-center text-sm font-medium">
-                                            <span class="text-slate-500">Total HT</span>
+                                            <span class="text-slate-500">{{ t('invoices.subtotal_ht') }}</span>
                                             <span class="text-slate-900">{{ formatCurrency(invoice.subtotal) }}</span>
                                         </div>
                                         <div class="flex justify-between items-center text-sm font-medium" v-if="settings.tax1_name && invoice.tax1_amount > 0">
@@ -273,7 +277,7 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
                                             <span class="text-slate-900">{{ formatCurrency(invoice.tax2_amount) }}</span>
                                         </div>
                                         <div class="flex justify-between items-center pt-4 border-t-2 border-slate-900">
-                                            <span class="font-black text-slate-900 uppercase">Total TTC</span>
+                                            <span class="font-black text-slate-900 uppercase">{{ t('invoices.total_ttc') }}</span>
                                             <span class="text-3xl font-black text-indigo-600">{{ formatCurrency(invoice.total) }}</span>
                                         </div>
                                     </div>
@@ -285,8 +289,13 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 
 
                 <!-- Footer / Legal -->
                 <div class="bg-slate-900 p-8 text-center text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] space-y-1">
-                    <p>Merci pour votre confiance.</p>
-                    <p>Conditions de règlement : Paiement à réception.</p>
+                    <p>{{ t('invoices.thank_you') }}</p>
+                    <p>{{ t('invoices.payment_terms') }}</p>
+                    <div v-if="settings.legal_mentions && settings.legal_mentions.length > 0" class="pt-4 mt-4 border-t border-slate-800 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[9px] font-medium opacity-80">
+                        <span v-for="(mention, index) in settings.legal_mentions" :key="index">
+                            <span class="font-bold tracking-widest text-slate-400">{{ mention.key }}</span> : {{ mention.value }}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>

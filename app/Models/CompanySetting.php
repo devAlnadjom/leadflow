@@ -25,6 +25,11 @@ class CompanySetting extends Model
         'tax2_rate',
         'currency',
         'terms_and_conditions',
+        'legal_mentions',
+    ];
+
+    protected $casts = [
+        'legal_mentions' => 'array',
     ];
 
     /**
