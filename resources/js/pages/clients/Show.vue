@@ -60,6 +60,15 @@ interface Quote {
     created_at: string;
 }
 
+interface Invoice {
+    id: number;
+    invoice_number: string;
+    status: string;
+    total: number;
+    due_date: string;
+    created_at: string;
+}
+
 interface ClientPayload {
     id: number;
     name: string;
@@ -73,6 +82,7 @@ interface ClientPayload {
     created_at: string;
     leads: Lead[];
     quotes: Quote[];
+    invoices: Invoice[];
     notes: Note[];
 }
 
@@ -171,6 +181,14 @@ const quoteStatuses: Record<string, { label: string; class: string }> = {
     expired: { label: 'Expiré', class: 'bg-amber-100 text-amber-700' },
 };
 
+const invoiceStatuses: Record<string, { label: string; class: string }> = {
+    draft: { label: 'Brouillon', class: 'bg-slate-100 text-slate-700' },
+    sent: { label: 'Envoyée', class: 'bg-blue-100 text-blue-700' },
+    paid: { label: 'Payée', class: 'bg-emerald-100 text-emerald-700' },
+    overdue: { label: 'En retard', class: 'bg-red-100 text-red-700' },
+    cancelled: { label: 'Annulée', class: 'bg-slate-100 text-slate-400' },
+};
+
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
 };
@@ -199,12 +217,17 @@ const formatCurrency = (value: number) => {
                         </p>
                     </div>
                 </div>
-                
+
                 <div class="flex items-center gap-2">
+                    <Button as-child class="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 shadow-sm font-medium">
+                        <Link :href="`/clients/${client.id}/invoices/create`">
+                            <Plus class="w-4 h-4" /> Nouvelle Facture
+                        </Link>
+                    </Button>
                     <Button variant="outline" class="gap-2 text-slate-600" @click="openEditDialog">
                         <Edit class="w-4 h-4" /> Modifier
                     </Button>
-                    <Button variant="outline" class="gap-2 text-red-500 hover:bg-red-50 hover:text-red-600 border-red-200" @click="confirmDeleteClient">
+                    <Button variant="outline" class="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200" @click="confirmAction = 'delete'">
                         <Trash2 class="w-4 h-4" /> Supprimer
                     </Button>
                 </div>
@@ -217,11 +240,11 @@ const formatCurrency = (value: number) => {
                         <!-- Contact Card -->
                         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
-                            
+
                             <h2 class="font-bold text-slate-800 flex items-center gap-2 mb-6">
                                 <Users class="w-5 h-5 text-indigo-500" /> Profil Client
                             </h2>
-                            
+
                             <div class="space-y-4">
                                 <div>
                                     <span class="text-[11px] font-bold uppercase text-slate-400 block mb-1">Email</span>
@@ -231,9 +254,9 @@ const formatCurrency = (value: number) => {
                                     </div>
                                     <span v-else class="text-slate-500 italic text-sm">Non renseigné</span>
                                 </div>
-                                
+
                                 <div class="w-full h-px bg-slate-100"></div>
-                                
+
                                 <div>
                                     <span class="text-[11px] font-bold uppercase text-slate-400 block mb-1">Téléphone</span>
                                     <div class="flex items-center gap-2" v-if="client.phone">
@@ -244,7 +267,7 @@ const formatCurrency = (value: number) => {
                                 </div>
 
                                 <div class="w-full h-px bg-slate-100"></div>
-                                
+
                                 <div>
                                     <span class="text-[11px] font-bold uppercase text-slate-400 block mb-1">Entreprise</span>
                                     <div class="flex items-center gap-2" v-if="client.company_name">
@@ -252,7 +275,7 @@ const formatCurrency = (value: number) => {
                                         <span class="text-slate-700 font-medium">{{ client.company_name }}</span>
                                     </div>
                                     <span v-else class="text-slate-500 italic text-sm">Non renseigné</span>
-                                    
+
                                     <div class="mt-2 pl-6" v-if="client.tax_number">
                                         <span class="text-xs text-slate-500 block">TVA / SIRET : {{ client.tax_number }}</span>
                                     </div>
@@ -287,12 +310,16 @@ const formatCurrency = (value: number) => {
                                         <FileText class="w-4 h-4" /> Aperçu
                                     </TabsTrigger>
                                     <TabsTrigger value="notes" class="flex items-center gap-2 px-4">
-                                        <MessageSquare class="w-4 h-4" /> 
+                                        <MessageSquare class="w-4 h-4" />
                                         Notes internes
                                         <Badge variant="secondary" class="ml-1 px-1.5 py-0 min-w-5 rounded-full text-xs font-normal" v-if="client.notes.length > 0">{{ client.notes.length }}</Badge>
                                     </TabsTrigger>
                                     <TabsTrigger value="invoices" class="flex items-center gap-2 px-4">
+                                        <FileText class="w-4 h-4" />
                                         Factures
+                                        <Badge v-if="client.invoices.length > 0" variant="secondary" class="ml-1 px-1.5 py-0 min-w-5 rounded-full text-xs font-normal">
+                                            {{ client.invoices.length }}
+                                        </Badge>
                                     </TabsTrigger>
                                     <TabsTrigger value="activities" class="flex items-center gap-2 px-4">
                                         Détail activités
@@ -312,7 +339,7 @@ const formatCurrency = (value: number) => {
                                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden">
                                     <div class="flex items-center justify-between mb-6">
                                         <h2 class="font-bold text-slate-800 flex items-center gap-2 leading-none">
-                                            <FileText class="w-5 h-5 text-indigo-500" /> 
+                                            <FileText class="w-5 h-5 text-indigo-500" />
                                             Devis
                                             <Badge variant="secondary" class="ml-2 font-normal">{{ client.quotes.length }}</Badge>
                                         </h2>
@@ -464,14 +491,60 @@ const formatCurrency = (value: number) => {
                                 </div>
                             </TabsContent>
 
-                            <!-- Factures Placeholder Tab -->
+                            <!-- Factures Tab -->
                             <TabsContent value="invoices" class="mt-0">
-                                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center">
-                                    <div class="w-16 h-16 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <FileText class="w-8 h-8 text-slate-300" />
+                                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden">
+                                    <div class="flex items-center justify-between mb-6">
+                                        <h2 class="font-bold text-slate-800 flex items-center gap-2 leading-none">
+                                            <FileText class="w-5 h-5 text-indigo-500" />
+                                            Factures
+                                            <Badge variant="secondary" class="ml-2 font-normal">{{ client.invoices.length }}</Badge>
+                                        </h2>
+                                        <Button size="sm" variant="outline" class="gap-1.5" as-child>
+                                            <Link :href="`/clients/${client.id}/invoices/create`">
+                                                <Plus class="w-3.5 h-3.5" /> Nouvelle
+                                            </Link>
+                                        </Button>
                                     </div>
-                                    <h3 class="font-bold text-lg text-slate-900 mb-2">Factures</h3>
-                                    <p class="text-slate-500 max-w-sm mx-auto">La gestion des factures pour ce client sera bientôt disponible dans cette section.</p>
+
+                                    <div v-if="client.invoices.length === 0" class="text-center py-10 px-4 bg-slate-50 rounded-xl border border-slate-100 border-dashed flex flex-col items-center justify-center gap-3">
+                                        <FileText class="w-10 h-10 text-slate-300" />
+                                        <div>
+                                            <h3 class="font-semibold text-slate-700">Aucune facture</h3>
+                                            <p class="text-slate-500 text-sm max-w-sm mt-1">Vous n'avez pas encore généré de facture pour ce client. Créez-en une dès maintenant.</p>
+                                        </div>
+                                        <Button class="bg-indigo-600 hover:bg-indigo-700 gap-1.5 mt-2" as-child>
+                                            <Link :href="`/clients/${client.id}/invoices/create`">
+                                                <Plus class="w-4 h-4" /> Créer une Facture
+                                            </Link>
+                                        </Button>
+                                    </div>
+
+                                    <div v-else class="grid gap-3">
+                                        <div v-for="invoice in client.invoices" :key="invoice.id" class="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-slate-300 hover:shadow-sm transition-all group bg-white">
+                                            <div>
+                                                <div class="flex items-center gap-2 mb-1">
+                                                    <Link :href="`/invoices/${invoice.id}`" class="font-bold text-slate-800 hover:text-indigo-600 flex items-center gap-1.5 transition-colors">
+                                                        {{ invoice.invoice_number }}
+                                                        <ExternalLink class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    </Link>
+                                                    <span :class="['text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full', invoiceStatuses[invoice.status]?.class || 'bg-slate-100 text-slate-500']">
+                                                        {{ invoiceStatuses[invoice.status]?.label || invoice.status }}
+                                                    </span>
+                                                </div>
+                                                <div class="text-xs text-slate-500 flex items-center gap-2">
+                                                    <span>Créée le {{ new Date(invoice.created_at).toLocaleDateString() }}</span>
+                                                    <span v-if="invoice.due_date" class="text-slate-400">&bull; Échéance le {{ new Date(invoice.due_date).toLocaleDateString() }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="text-right flex items-center gap-4">
+                                                <div class="font-black text-slate-900 text-lg">{{ formatCurrency(invoice.total) }}</div>
+                                                <Link :href="`/invoices/${invoice.id}`" class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                                                    <ArrowRight class="w-4 h-4" />
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </TabsContent>
 

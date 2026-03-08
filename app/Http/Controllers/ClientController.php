@@ -17,7 +17,7 @@ class ClientController extends Controller
         $search = trim((string) $request->query('search', ''));
 
         $clientsQuery = Client::query()
-            ->withCount(['leads', 'quotes'])
+            ->withCount(['leads', 'quotes', 'invoices'])
             ->where('company_id', $company->id)
             ->latest();
 
@@ -37,6 +37,7 @@ class ClientController extends Controller
             'company_name' => $client->company_name,
             'leads_count' => $client->leads_count,
             'quotes_count' => $client->quotes_count,
+            'invoices_count' => $client->invoices_count,
             'created_at' => $client->created_at?->toDateTimeString(),
         ]);
 
@@ -59,6 +60,8 @@ class ClientController extends Controller
         $record->load(['leads' => function ($query) {
             $query->latest();
         }, 'quotes' => function ($query) {
+            $query->latest();
+        }, 'invoices' => function ($query) {
             $query->latest();
         }, 'notes.user']);
 
@@ -88,6 +91,14 @@ class ClientController extends Controller
                     'total' => $quote->total,
                     'expire_at' => $quote->expire_at?->toDateString(),
                     'created_at' => $quote->created_at?->toDateTimeString(),
+                ]),
+                'invoices' => $record->invoices->map(fn ($invoice) => [
+                    'id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'status' => $invoice->status,
+                    'total' => $invoice->total,
+                    'due_date' => $invoice->due_date?->toDateString(),
+                    'created_at' => $invoice->created_at?->toDateTimeString(),
                 ]),
                 'notes' => $record->notes->sortByDesc('created_at')->values()->map(fn ($note) => [
                     'id' => $note->id,

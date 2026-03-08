@@ -63,6 +63,14 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::get('widgets/{leadForm}', [WidgetController::class, 'show'])->name('widgets.show');
     Route::get('widgets/{leadForm}/edit', [WidgetController::class, 'edit'])->name('widgets.edit');
     Route::patch('widgets/{leadForm}', [WidgetController::class, 'update'])->name('widgets.update');
+    // Invoices
+    Route::get('invoices', [\App\Http\Controllers\InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('clients/{client}/invoices/create', [\App\Http\Controllers\InvoiceController::class, 'create'])->name('invoices.create');
+    Route::post('invoices', [\App\Http\Controllers\InvoiceController::class, 'store'])->name('invoices.store');
+    Route::get('invoices/{invoice}', [\App\Http\Controllers\InvoiceController::class, 'show'])->name('invoices.show');
+    Route::patch('invoices/{invoice}/status', [\App\Http\Controllers\InvoiceController::class, 'updateStatus'])->name('invoices.update_status');
+    Route::delete('invoices/{invoice}', [\App\Http\Controllers\InvoiceController::class, 'destroy'])->name('invoices.destroy');
+
     Route::delete('widgets/{leadForm}', [WidgetController::class, 'destroy'])->name('widgets.destroy');
 });
 

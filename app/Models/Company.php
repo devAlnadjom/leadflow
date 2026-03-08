@@ -51,6 +51,22 @@ class Company extends Model
     }
 
     /**
+     * Get all quotes for this company.
+     */
+    public function quotes(): HasMany
+    {
+        return $this->hasMany(Quote::class);
+    }
+
+    /**
+     * Get all invoices for this company.
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    /**
      * Get this company's settings.
      */
     public function settings(): HasOne

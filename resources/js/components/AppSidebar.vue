@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FileText, FolderGit2, LayoutGrid, Puzzle, Users, Briefcase } from 'lucide-vue-next';
+import { BookOpen, FileText, FolderGit2, LayoutGrid, Puzzle, Users, Briefcase, Receipt } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -46,6 +46,11 @@ const mainNavItems = computed<NavItem[]>(() => [
         title: 'Devis',
         href: '/quotes',
         icon: FileText,
+    },
+    {
+        title: 'Factures',
+        href: '/invoices',
+        icon: Receipt,
     },
 ]);
 
