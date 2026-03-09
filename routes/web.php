@@ -56,6 +56,9 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::post('tags', [\App\Http\Controllers\TagController::class, 'store'])->name('tags.store');
     Route::post('tags/sync', [\App\Http\Controllers\TagController::class, 'sync'])->name('tags.sync');
 
+    Route::post('notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::post('notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+
     Route::resource('clients', \App\Http\Controllers\ClientController::class);
     Route::post('/clients/{client}/notes', [\App\Http\Controllers\ClientNoteController::class, 'store'])->name('clients.notes.store');
     Route::delete('/clients/{client}/notes/{note}', [\App\Http\Controllers\ClientNoteController::class, 'destroy'])->name('clients.notes.destroy');

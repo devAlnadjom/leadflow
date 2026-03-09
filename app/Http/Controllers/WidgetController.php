@@ -11,7 +11,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
+use App\Notifications\LeadReceivedNotification;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -230,9 +232,9 @@ class WidgetController extends Controller
             payload[field.field_key] = state.values[field.field_key];
         });
 
-        var hp = form.querySelector('[name="_leadflow_email"]');
+        var hp = form.querySelector('[name="_website_url_hp"]');
         if (hp) {
-            payload['_leadflow_email'] = hp.value;
+            payload['_website_url_hp'] = hp.value;
         }
 
         return payload;
@@ -287,7 +289,7 @@ class WidgetController extends Controller
                     + (allFields.length === 0
                         ? '<p style="margin:8px 0 0;color:#64748b;font-size:13px;">No fields configured for this widget.</p>'
                         : '<form id="leadflow-widget-form-' + uid + '">'
-                        + '<div style="position:absolute;left:-9999px;top:-9999px;"><label for="leadflow-hp-' + uid + '">Leave this field empty</label><input type="text" id="leadflow-hp-' + uid + '" name="_leadflow_email" tabindex="-1" autocomplete="off"></div>'
+                        + '<div style="position:absolute;left:-9999px;top:-9999px;"><label for="leadflow-hp-' + uid + '">Leave this field empty</label><input type="text" id="leadflow-hp-' + uid + '" name="_website_url_hp" tabindex="-1" autocomplete="new-password"></div>'
                         + fieldsHtml
                         + sliderNavigationHtml
                         + ((layoutMode === 'stack' || isLastStep)
@@ -653,7 +655,7 @@ JS;
             }
         }
 
-        $form->records()->create([
+        $record = $form->records()->create([
             'company_id' => $form->company_id,
             'name' => $capturedName,
             'email' => $capturedEmail,
@@ -661,6 +663,8 @@ JS;
             'payload' => $payload,
             'source' => 'widget_preview',
         ]);
+
+        Notification::send($form->company->users, new LeadReceivedNotification($record));
 
         return to_route('widgets.preview', ['uid' => $uid])
             ->with('widget_submission_status', 'submitted');
@@ -682,7 +686,7 @@ JS;
         /** @var array<string, mixed> $data */
         $data = $request->input('data', []);
 
-        if (!empty($data['_leadflow_email'])) {
+        if (!empty($data['_website_url_hp'])) {
             return response()->json([
                 'status' => 'ok',
             ]);
@@ -727,7 +731,7 @@ JS;
             }
         }
 
-        $form->records()->create([
+        $record = $form->records()->create([
             'company_id' => $form->company_id,
             'name' => $capturedName,
             'email' => $capturedEmail,
@@ -735,6 +739,8 @@ JS;
             'payload' => $payload,
             'source' => 'widget_script',
         ]);
+
+        Notification::send($form->company->users, new LeadReceivedNotification($record));
 
         return response()->json([
             'status' => 'ok',

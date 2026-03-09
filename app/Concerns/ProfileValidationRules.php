@@ -17,6 +17,7 @@ trait ProfileValidationRules
         return [
             'name' => $this->nameRules(),
             'email' => $this->emailRules($userId),
+            'notification_preference' => ['nullable', 'string', \Illuminate\Validation\Rule::in(['immediate', 'hourly'])],
         ];
     }
 

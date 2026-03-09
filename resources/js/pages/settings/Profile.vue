@@ -80,6 +80,20 @@ const user = computed(() => page.props.auth.user);
                         <InputError class="mt-2" :message="errors.email" />
                     </div>
 
+                    <div class="grid gap-2">
+                        <Label for="notification_preference">Préférences de notification pour les Leads</Label>
+                        <select
+                            id="notification_preference"
+                            name="notification_preference"
+                            class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+                            :value="user.notification_preference"
+                        >
+                            <option value="immediate">Immédiat (Email à chaque Lead)</option>
+                            <option value="hourly">Résumé (Groupé, 1 fois par heure)</option>
+                        </select>
+                        <InputError class="mt-2" :message="errors.notification_preference" />
+                    </div>
+
                     <div v-if="mustVerifyEmail && !user.email_verified_at">
                         <p class="-mt-4 text-sm text-muted-foreground">
                             Your email address is unverified.

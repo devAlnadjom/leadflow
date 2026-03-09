@@ -42,6 +42,8 @@ class HandleInertiaRequests extends Middleware
             'locales' => ['en', 'fr'],
             'auth' => [
                 'user' => $request->user(),
+                'unreadNotificationsCount' => $request->user() ? $request->user()->unreadNotifications()->count() : 0,
+                'notifications' => $request->user() ? $request->user()->notifications()->latest()->take(5)->get() : [],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [
