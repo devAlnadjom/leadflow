@@ -47,4 +47,9 @@ class Client extends Model
     {
         return $this->hasMany(Task::class)->latest();
     }
+
+    public function tags(): \Illuminate\Database\Eloquent\Relations\MorphToMany
+    {
+        return $this->morphToMany(Tag::class, 'taggable');
+    }
 }

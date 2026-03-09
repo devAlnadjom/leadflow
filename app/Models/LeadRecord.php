@@ -80,4 +80,12 @@ class LeadRecord extends Model
     {
         return $this->hasMany(Task::class)->latest();
     }
+
+    /**
+     * Get the tags for this lead record.
+     */
+    public function tags(): \Illuminate\Database\Eloquent\Relations\MorphToMany
+    {
+        return $this->morphToMany(Tag::class, 'taggable');
+    }
 }

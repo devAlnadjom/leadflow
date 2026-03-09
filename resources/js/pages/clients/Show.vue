@@ -3,7 +3,7 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { 
     ChevronLeft, Edit, Trash2, Mail, Phone, Building, MapPin, 
-    FileText, Users, Calendar, ArrowRight, ExternalLink, Plus, MessageSquare, Briefcase
+    FileText, Users, Calendar, ArrowRight, ExternalLink, Plus, MessageSquare, Briefcase, Tag as TagIcon, XCircle
 } from 'lucide-vue-next';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,18 @@ import {
 } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import type { BreadcrumbItem } from '@/types';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+interface Tag {
+    id: number;
+    name: string;
+    color: string | null;
+}
 
 interface Note {
     id: number;
@@ -84,10 +96,12 @@ interface ClientPayload {
     quotes: Quote[];
     invoices: Invoice[];
     notes: Note[];
+    tags?: Tag[];
 }
 
 const props = defineProps<{
     client: ClientPayload;
+    availableTags?: Tag[];
 }>();
 
 const noteForm = useForm({
@@ -111,6 +125,59 @@ const deleteNote = (noteId: number) => {
             preserveScroll: true,
         });
     }
+};
+
+const newTagStr = ref('');
+const isAddingTag = ref(false);
+
+const addTag = () => {
+    const val = newTagStr.value.trim();
+    if (!val) return;
+    
+    // Check if it already exists
+    const existing = props.client.tags?.find((t: Tag) => t.name.toLowerCase() === val.toLowerCase());
+    if (existing) {
+        newTagStr.value = '';
+        isAddingTag.value = false;
+        return;
+    }
+
+    const currentTagIds = props.client.tags?.map((t: Tag) => t.id) || [];
+    
+    // Also include the new text
+    router.post('/tags/sync', {
+        taggable_id: props.client.id,
+        taggable_type: 'client',
+        tags: [...currentTagIds, val]
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            newTagStr.value = '';
+            isAddingTag.value = false;
+        }
+    });
+};
+
+const attachExistingTag = (tagId: number) => {
+    const currentTagIds = props.client.tags?.map((t: Tag) => t.id) || [];
+    if (currentTagIds.includes(tagId)) return;
+    
+    router.post('/tags/sync', {
+        taggable_id: props.client.id,
+        taggable_type: 'client',
+        tags: [...currentTagIds, tagId]
+    }, { preserveScroll: true });
+};
+
+const removeTag = (tagId: number) => {
+    const currentTagIds = props.client.tags?.map((t: Tag) => t.id) || [];
+    const newIds = currentTagIds.filter((id: number) => id !== tagId);
+    
+    router.post('/tags/sync', {
+        taggable_id: props.client.id,
+        taggable_type: 'client',
+        tags: newIds
+    }, { preserveScroll: true });
 };
 
 const breadcrumbs = computed<BreadcrumbItem[]>(() => [
@@ -296,6 +363,71 @@ const formatCurrency = (value: number) => {
                                     </div>
                                     <span v-else class="text-slate-500 italic text-sm">Non renseigné</span>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Tags Card -->
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden">
+                            <h2 class="font-bold text-slate-800 flex items-center gap-2 mb-6">
+                                <TagIcon class="w-5 h-5 text-violet-500" /> Étiquettes (Tags)
+                            </h2>
+
+                            <!-- Display Tags -->
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <div v-if="!client.tags || client.tags.length === 0" class="text-xs text-slate-400 italic">
+                                    Aucun tag
+                                </div>
+                                <span 
+                                    v-for="tag in client.tags" 
+                                    :key="tag.id" 
+                                    class="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-white shadow-sm"
+                                    :style="{ backgroundColor: tag.color || '#6366f1' }"
+                                >
+                                    {{ tag.name }}
+                                    <button @click="removeTag(tag.id)" class="ml-1.5 focus:outline-none hover:opacity-75">
+                                        <XCircle class="w-3.5 h-3.5 opacity-80" />
+                                    </button>
+                                </span>
+                            </div>
+
+                            <!-- Add Tag Form -->
+                            <div class="pt-4 border-t border-slate-100 relative">
+                                <div class="flex items-center gap-2">
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="outline" size="sm" class="h-8 gap-1.5 text-xs px-2" v-if="availableTags && availableTags.length > 0">
+                                                <Plus class="w-3.5 h-3.5" /> Existant
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="start" class="w-48 max-h-64 overflow-y-auto">
+                                            <DropdownMenuItem 
+                                                v-for="t in availableTags.filter(at => !client.tags?.some(lt => lt.id === at.id))" 
+                                                :key="t.id"
+                                                class="cursor-pointer"
+                                                @click="attachExistingTag(t.id)"
+                                            >
+                                                <div class="w-2.5 h-2.5 rounded-full mr-2" :style="{ backgroundColor: t.color || '#6366f1' }"></div>
+                                                {{ t.name }}
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+
+                                    <Button variant="ghost" size="sm" class="h-8 gap-1 text-slate-500 hover:text-indigo-600 px-2 text-xs" @click="isAddingTag = !isAddingTag">
+                                        <Plus class="w-3.5 h-3.5" /> Nouveau Tag
+                                    </Button>
+                                </div>
+                                
+                                <form v-if="isAddingTag" @submit.prevent="addTag" class="mt-3 flex gap-2">
+                                    <input 
+                                        v-model="newTagStr" 
+                                        type="text" 
+                                        placeholder="Nom du tag..." 
+                                        class="flex-1 text-xs rounded-md border-slate-200 focus:border-indigo-500 py-1.5 bg-slate-50" 
+                                        required 
+                                        autofocus
+                                    />
+                                    <Button type="submit" size="sm" class="h-8 px-3 text-xs bg-indigo-600 hover:bg-indigo-700">OK</Button>
+                                </form>
                             </div>
                         </div>
                     </div>

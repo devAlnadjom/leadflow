@@ -29,6 +29,11 @@ type LeadItem = {
     status: string;
     value: number;
     created_at: string | null;
+    tags?: Array<{
+        id: number;
+        name: string;
+        color: string | null;
+    }>;
 };
 
 type LeadFormItem = {
@@ -319,6 +324,17 @@ const getStatusValue = (statusId: string) => {
                                     </div>
                                 </div>
 
+                                <div v-if="lead.tags && lead.tags.length > 0" class="flex flex-wrap gap-1 mb-3">
+                                    <span 
+                                        v-for="tag in lead.tags" 
+                                        :key="tag.id" 
+                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium text-white"
+                                        :style="{ backgroundColor: tag.color || '#6366f1' }"
+                                    >
+                                        {{ tag.name }}
+                                    </span>
+                                </div>
+
                                 <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
                                     <div class="flex items-center gap-1" title="Source / Widget">
                                         <Badge variant="secondary" class="font-normal text-[10px] px-1.5 py-0 h-4">
@@ -360,6 +376,16 @@ const getStatusValue = (statusId: string) => {
                             <tr v-for="lead in leads.data" :key="lead.id" class="bg-white hover:bg-slate-50/80 transition-colors">
                                 <td class="px-4 py-3">
                                     <div class="font-medium text-slate-900">{{ lead.name || 'Anonyme' }}</div>
+                                    <div v-if="lead.tags && lead.tags.length > 0" class="flex flex-wrap gap-1 mt-1">
+                                        <span 
+                                            v-for="tag in lead.tags" 
+                                            :key="tag.id" 
+                                            class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium text-white"
+                                            :style="{ backgroundColor: tag.color || '#6366f1' }"
+                                        >
+                                            {{ tag.name }}
+                                        </span>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-3">
                                     <DropdownMenu>

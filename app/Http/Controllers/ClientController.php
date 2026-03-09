@@ -17,6 +17,7 @@ class ClientController extends Controller
         $search = trim((string) $request->query('search', ''));
 
         $clientsQuery = Client::query()
+            ->with('tags')
             ->withCount(['leads', 'quotes', 'invoices'])
             ->where('company_id', $company->id)
             ->latest();
@@ -39,10 +40,12 @@ class ClientController extends Controller
             'quotes_count' => $client->quotes_count,
             'invoices_count' => $client->invoices_count,
             'created_at' => $client->created_at?->toDateTimeString(),
+            'tags' => $client->tags->map(fn ($t) => ['id' => $t->id, 'name' => $t->name, 'color' => $t->color])->toArray(),
         ]);
 
         return Inertia::render('clients/Index', [
             'clients' => $clients,
+            'tags' => \App\Models\Tag::query()->orderBy('name')->get(['id', 'name', 'color']),
             'filters' => [
                 'search' => $search,
             ],
@@ -63,7 +66,7 @@ class ClientController extends Controller
             $query->latest();
         }, 'invoices' => function ($query) {
             $query->latest();
-        }, 'notes.user']);
+        }, 'notes.user', 'tasks.user', 'tags']);
 
         return Inertia::render('clients/Show', [
             'client' => [
@@ -107,7 +110,18 @@ class ClientController extends Controller
                     'author' => $note->user?->name ?? 'Système',
                     'created_at' => $note->created_at?->toDateTimeString(),
                 ]),
+                'tasks' => $record->tasks->map(fn ($task) => [
+                    'id' => $task->id,
+                    'title' => $task->title,
+                    'description' => $task->description,
+                    'due_date' => $task->due_date?->toDateTimeString(),
+                    'is_completed' => $task->is_completed,
+                    'created_at' => $task->created_at?->toDateTimeString(),
+                    'author' => $task->user?->name ?? 'Système',
+                ]),
+                'tags' => $record->tags->map(fn ($t) => ['id' => $t->id, 'name' => $t->name, 'color' => $t->color])->toArray(),
             ],
+            'availableTags' => \App\Models\Tag::query()->orderBy('name')->get(['id', 'name', 'color']),
         ]);
     }
 

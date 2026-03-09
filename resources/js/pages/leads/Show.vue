@@ -23,7 +23,8 @@ import {
     Calendar,
     Bell,
     CheckSquare,
-    Square
+    Square,
+    Tag as TagIcon
 } from 'lucide-vue-next';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
@@ -88,10 +89,20 @@ type LeadPayload = {
         created_at: string;
         author: string;
     }>;
+    tags?: Array<{
+        id: number;
+        name: string;
+        color: string | null;
+    }>;
 };
 
 type Props = {
     lead: LeadPayload;
+    availableTags: Array<{
+        id: number;
+        name: string;
+        color: string | null;
+    }>;
 };
 
 const props = defineProps<Props>();
@@ -216,6 +227,59 @@ const toggleTask = (task: any) => {
 
 const deleteTask = (taskId: number) => {
     router.delete(`/tasks/${taskId}`, { preserveScroll: true });
+};
+
+const newTagStr = ref('');
+const isAddingTag = ref(false);
+
+const addTag = () => {
+    const val = newTagStr.value.trim();
+    if (!val) return;
+    
+    // Check if it already exists
+    const existing = props.lead.tags?.find(t => t.name.toLowerCase() === val.toLowerCase());
+    if (existing) {
+        newTagStr.value = '';
+        isAddingTag.value = false;
+        return;
+    }
+
+    const currentTagIds = props.lead.tags?.map(t => t.id) || [];
+    
+    // Also include the new text
+    router.post('/tags/sync', {
+        taggable_id: props.lead.id,
+        taggable_type: 'lead',
+        tags: [...currentTagIds, val]
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            newTagStr.value = '';
+            isAddingTag.value = false;
+        }
+    });
+};
+
+const attachExistingTag = (tagId: number) => {
+    const currentTagIds = props.lead.tags?.map(t => t.id) || [];
+    if (currentTagIds.includes(tagId)) return;
+    
+    router.post('/tags/sync', {
+        taggable_id: props.lead.id,
+        taggable_type: 'lead',
+        tags: [...currentTagIds, tagId]
+    }, { preserveScroll: true });
+};
+
+const removeTag = (tagId: number) => {
+    const currentTagIds = props.lead.tags?.map(t => t.id) || [];
+    const newIds = currentTagIds.filter(id => id !== tagId);
+    
+    router.post('/tags/sync', {
+        taggable_id: props.lead.id,
+        taggable_type: 'lead',
+        tags: newIds
+    }, { preserveScroll: true });
 };
 
 const activities = computed(() => {
@@ -444,6 +508,74 @@ const activities = computed(() => {
                                         <span v-else class="text-slate-400 italic">Non renseigné</span>
                                     </p>
                                 </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tags Card -->
+                    <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                        <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                            <h3 class="font-semibold text-slate-800 flex items-center gap-2">
+                                <TagIcon class="w-4 h-4 text-violet-500" /> Étiquettes (Tags)
+                            </h3>
+                        </div>
+                        <div class="p-5 flex flex-col gap-4">
+                            <!-- Display Tags -->
+                            <div class="flex flex-wrap gap-2">
+                                <div v-if="!lead.tags || lead.tags.length === 0" class="text-xs text-slate-400 italic">
+                                    Aucun tag
+                                </div>
+                                <span 
+                                    v-for="tag in lead.tags" 
+                                    :key="tag.id" 
+                                    class="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-white shadow-sm"
+                                    :style="{ backgroundColor: tag.color || '#6366f1' }"
+                                >
+                                    {{ tag.name }}
+                                    <button @click="removeTag(tag.id)" class="ml-1.5 focus:outline-none hover:opacity-75">
+                                        <XCircle class="w-3.5 h-3.5 opacity-80" />
+                                    </button>
+                                </span>
+                            </div>
+
+                            <!-- Add Tag Form -->
+                            <div class="pt-2 border-t border-slate-100 relative">
+                                <div class="flex items-center gap-2">
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="outline" size="sm" class="h-8 gap-1.5 text-xs px-2" v-if="availableTags && availableTags.length > 0">
+                                                <Plus class="w-3.5 h-3.5" /> Existant
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="start" class="w-48 max-h-64 overflow-y-auto">
+                                            <DropdownMenuItem 
+                                                v-for="t in availableTags.filter(at => !lead.tags?.some(lt => lt.id === at.id))" 
+                                                :key="t.id"
+                                                class="cursor-pointer"
+                                                @click="attachExistingTag(t.id)"
+                                            >
+                                                <div class="w-2.5 h-2.5 rounded-full mr-2" :style="{ backgroundColor: t.color || '#6366f1' }"></div>
+                                                {{ t.name }}
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+
+                                    <Button variant="ghost" size="sm" class="h-8 gap-1 text-slate-500 hover:text-indigo-600 px-2 text-xs" @click="isAddingTag = !isAddingTag">
+                                        <Plus class="w-3.5 h-3.5" /> Nouveau Tag
+                                    </Button>
+                                </div>
+                                
+                                <form v-if="isAddingTag" @submit.prevent="addTag" class="mt-3 flex gap-2">
+                                    <input 
+                                        v-model="newTagStr" 
+                                        type="text" 
+                                        placeholder="Nom du tag..." 
+                                        class="flex-1 text-xs rounded-md border-slate-200 focus:border-indigo-500 py-1.5 bg-slate-50" 
+                                        required 
+                                        autofocus
+                                    />
+                                    <Button type="submit" size="sm" class="h-8 px-3 text-xs bg-indigo-600 hover:bg-indigo-700">OK</Button>
+                                </form>
                             </div>
                         </div>
                     </section>

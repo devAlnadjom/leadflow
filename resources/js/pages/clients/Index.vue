@@ -27,6 +27,11 @@ type ClientItem = {
     leads_count: number;
     quotes_count: number;
     created_at: string | null;
+    tags?: Array<{
+        id: number;
+        name: string;
+        color: string | null;
+    }>;
 };
 
 type PaginationLink = {
@@ -173,6 +178,17 @@ const setViewMode = (mode: string) => {
                                 <p v-if="client.company_name" class="text-xs font-semibold text-indigo-600 flex items-center gap-1 mt-1 truncate">
                                     <Building class="w-3 h-3" /> {{ client.company_name }}
                                 </p>
+
+                                <div v-if="client.tags && client.tags.length > 0" class="flex flex-wrap gap-1 mt-3">
+                                    <span 
+                                        v-for="tag in client.tags" 
+                                        :key="tag.id" 
+                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium text-white"
+                                        :style="{ backgroundColor: tag.color || '#6366f1' }"
+                                    >
+                                        {{ tag.name }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -228,6 +244,17 @@ const setViewMode = (mode: string) => {
                                         {{ client.name }}
                                     </Link>
                                     <div class="text-xs text-slate-400 mt-0.5" v-if="client.created_at">Depuis {{ new Date(client.created_at).toLocaleDateString() }}</div>
+                                    
+                                    <div v-if="client.tags && client.tags.length > 0" class="flex flex-wrap gap-1 mt-2">
+                                        <span 
+                                            v-for="tag in client.tags" 
+                                            :key="tag.id" 
+                                            class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium text-white"
+                                            :style="{ backgroundColor: tag.color || '#6366f1' }"
+                                        >
+                                            {{ tag.name }}
+                                        </span>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-3 text-slate-600">
                                     {{ client.company_name || '-' }}

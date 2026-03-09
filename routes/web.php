@@ -52,6 +52,10 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::patch('tasks/{task}', [\App\Http\Controllers\TaskController::class, 'update'])->name('tasks.update');
     Route::delete('tasks/{task}', [\App\Http\Controllers\TaskController::class, 'destroy'])->name('tasks.destroy');
 
+    Route::get('tags', [\App\Http\Controllers\TagController::class, 'index'])->name('tags.index');
+    Route::post('tags', [\App\Http\Controllers\TagController::class, 'store'])->name('tags.store');
+    Route::post('tags/sync', [\App\Http\Controllers\TagController::class, 'sync'])->name('tags.sync');
+
     Route::resource('clients', \App\Http\Controllers\ClientController::class);
     Route::post('/clients/{client}/notes', [\App\Http\Controllers\ClientNoteController::class, 'store'])->name('clients.notes.store');
     Route::delete('/clients/{client}/notes/{note}', [\App\Http\Controllers\ClientNoteController::class, 'destroy'])->name('clients.notes.destroy');

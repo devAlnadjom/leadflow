@@ -22,7 +22,7 @@ class LeadController extends Controller
         $leadFormId = (int) $request->query('lead_form_id', 0);
 
         $recordsQuery = LeadRecord::query()
-            ->with('leadForm:id,name,company_id')
+            ->with(['tags', 'leadForm:id,name,company_id'])
             ->whereHas('leadForm', fn ($query) => $query->where('company_id', $company->id))
             ->latest();
 
@@ -53,10 +53,12 @@ class LeadController extends Controller
                 'status' => $record->status ?? 'new',
                 'value' => $record->value ?? 0,
                 'created_at' => $record->created_at?->toDateTimeString(),
+                'tags' => $record->tags->map(fn ($t) => ['id' => $t->id, 'name' => $t->name, 'color' => $t->color])->toArray(),
             ]);
 
         return Inertia::render('leads/Index', [
             'leads' => $records,
+            'tags' => \App\Models\Tag::query()->orderBy('name')->get(['id', 'name', 'color']),
             'filters' => [
                 'search' => $search,
                 'lead_form_id' => $leadFormId > 0 ? $leadFormId : null,
@@ -114,7 +116,7 @@ class LeadController extends Controller
     public function show(Request $request, int $lead): Response
     {
         $record = $this->resolveCompanyLead($request, $lead);
-        $record->load(['notes.user:id,name', 'quotes', 'tasks.user:id,name']);
+        $record->load(['notes.user:id,name', 'quotes', 'tasks.user:id,name', 'tags']);
 
         return Inertia::render('leads/Show', [
             'lead' => [
@@ -156,7 +158,9 @@ class LeadController extends Controller
                     'created_at' => $task->created_at?->toDateTimeString(),
                     'author' => $task->user?->name ?? 'Système',
                 ]),
+                'tags' => $record->tags->map(fn ($t) => ['id' => $t->id, 'name' => $t->name, 'color' => $t->color])->toArray(),
             ],
+            'availableTags' => \App\Models\Tag::query()->orderBy('name')->get(['id', 'name', 'color']),
         ]);
     }
 
