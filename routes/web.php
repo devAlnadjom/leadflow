@@ -14,11 +14,15 @@ Route::inertia('/', 'Welcome', [
 ])->name('home');
 
 Route::post('locale', LocaleController::class)->name('locale.update');
+
+// Widget public endpoints — CORS open to all origins (embeddable widget)
+// OPTIONS preflight responses are handled automatically by Laravel's CORS middleware
+// using the paths defined in config/cors.php
 Route::get('widget.js', [WidgetController::class, 'script'])->name('widgets.script');
 Route::get('widget-config', [WidgetController::class, 'config'])->name('widgets.config');
 Route::post('widget-submit', [WidgetController::class, 'submit'])
     ->withoutMiddleware([VerifyCsrfToken::class])
-    ->middleware('throttle:10,1')
+    ->middleware('throttle:30,1')
     ->name('widgets.submit');
 Route::get('widget-preview', [WidgetController::class, 'preview'])->name('widgets.preview');
 Route::post('widget-preview', [WidgetController::class, 'submitPreview'])
