@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Middleware\EnsureCompanyOnboarded;
+use App\Http\Middleware\EnsureSuperAdmin;
+use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SetLocale;
@@ -17,7 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'onboarded' => EnsureCompanyOnboarded::class,
+            'onboarded'    => EnsureCompanyOnboarded::class,
+            'super.admin'  => EnsureSuperAdmin::class,
+            'user.active'  => EnsureUserIsActive::class,
         ]);
 
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);

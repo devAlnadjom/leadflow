@@ -25,6 +25,8 @@ class User extends Authenticatable
         'email',
         'password',
         'notification_preference',
+        'is_super_admin',
+        'is_active',
     ];
 
     /**
@@ -67,5 +69,13 @@ class User extends Authenticatable
     public function hasCompletedOnboarding(): bool
     {
         return $this->company_id !== null;
+    }
+
+    /**
+     * Determine whether the user is a super administrator.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return (bool) $this->is_super_admin;
     }
 }

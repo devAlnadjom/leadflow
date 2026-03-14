@@ -28,6 +28,7 @@ class Company extends Model
         'logo_path',
         'primary_color',
         'secondary_color',
+        'is_active',
     ];
 
     /**

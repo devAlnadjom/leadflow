@@ -44,12 +44,19 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
                 'unreadNotificationsCount' => $request->user() ? $request->user()->unreadNotifications()->count() : 0,
                 'notifications' => $request->user() ? $request->user()->notifications()->latest()->take(5)->get() : [],
+                'is_super_admin' => $request->user()?->isSuperAdmin() ?? false,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [
                 'success' => $request->session()->get('success'),
-                'error' => $request->session()->get('error'),
+                'error'   => $request->session()->get('error'),
                 'message' => $request->session()->get('message'),
+            ],
+            'ghostMode' => [
+                'active'              => (bool) session('impersonating_admin_id'),
+                'original_admin_name' => session('impersonating_admin_id')
+                    ? optional(\App\Models\User::find(session('impersonating_admin_id')))->name
+                    : null,
             ],
         ];
     }

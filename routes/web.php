@@ -38,12 +38,12 @@ Route::post('devis/{uid}/respond', [\App\Http\Controllers\PublicQuoteController:
 // Public invoice view (no auth required)
 Route::get('facture/{uid}', [\App\Http\Controllers\PublicInvoiceController::class, 'show'])->name('invoices.public.show');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'user.active'])->group(function () {
     Route::get('onboarding/company', [OnboardingController::class, 'create'])->name('onboarding.company.create');
     Route::post('onboarding/company', [OnboardingController::class, 'store'])->name('onboarding.company.store');
 });
 
-Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
+Route::middleware(['auth', 'verified', 'user.active', 'onboarded'])->group(function () {
     Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     Route::resource('leads', LeadController::class);
     Route::patch('leads/{lead}/status', [LeadController::class, 'updateStatus'])->name('leads.update_status');
@@ -96,3 +96,33 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
 });
 
 require __DIR__.'/settings.php';
+
+// ─── Super Admin Panel ─────────────────────────────────────────────────────────
+Route::prefix('admin')
+    ->middleware(['auth', 'verified', 'super.admin'])
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\AdminController::class, 'dashboard'])->name('dashboard');
+
+        // Companies
+        Route::get('companies',         [\App\Http\Controllers\Admin\AdminCompanyController::class, 'index'])->name('companies.index');
+        Route::get('companies/create',  [\App\Http\Controllers\Admin\AdminCompanyController::class, 'create'])->name('companies.create');
+        Route::post('companies',        [\App\Http\Controllers\Admin\AdminCompanyController::class, 'store'])->name('companies.store');
+        Route::get('companies/{company}',       [\App\Http\Controllers\Admin\AdminCompanyController::class, 'show'])->name('companies.show');
+        Route::get('companies/{company}/edit',  [\App\Http\Controllers\Admin\AdminCompanyController::class, 'edit'])->name('companies.edit');
+        Route::put('companies/{company}',       [\App\Http\Controllers\Admin\AdminCompanyController::class, 'update'])->name('companies.update');
+        Route::patch('companies/{company}/toggle', [\App\Http\Controllers\Admin\AdminCompanyController::class, 'toggleActive'])->name('companies.toggle');
+
+        // Users
+        Route::get('users',          [\App\Http\Controllers\Admin\AdminUserController::class, 'index'])->name('users.index');
+        Route::get('users/create',   [\App\Http\Controllers\Admin\AdminUserController::class, 'create'])->name('users.create');
+        Route::post('users',         [\App\Http\Controllers\Admin\AdminUserController::class, 'store'])->name('users.store');
+        Route::get('users/{user}/edit',   [\App\Http\Controllers\Admin\AdminUserController::class, 'edit'])->name('users.edit');
+        Route::put('users/{user}',        [\App\Http\Controllers\Admin\AdminUserController::class, 'update'])->name('users.update');
+        Route::patch('users/{user}/toggle', [\App\Http\Controllers\Admin\AdminUserController::class, 'toggleActive'])->name('users.toggle');
+        Route::post('users/{user}/reset-password', [\App\Http\Controllers\Admin\AdminUserController::class, 'resetPassword'])->name('users.reset-password');
+
+        // Ghost Mode (Impersonation)
+        Route::post('impersonate/{user}',  [\App\Http\Controllers\Admin\AdminController::class, 'impersonate'])->name('impersonate');
+        Route::post('stop-impersonating',  [\App\Http\Controllers\Admin\AdminController::class, 'stopImpersonating'])->name('stop-impersonating');
+    });
