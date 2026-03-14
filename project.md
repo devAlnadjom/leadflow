@@ -31,6 +31,12 @@ Créer une plateforme SaaS permettant aux entreprises (construction, esthétique
 - Types de champs : Text, Email, Tel (avec inputmode/autocomplete), Select, Radio, Checkbox, Textarea.
 - Sécurité : Honeypot invisible et Rate limit (10 requêtes/min par IP).
 - Dashboard de gestion des widgets.
+- Système de Templates de Widgets (Réalisé ✅) :
+  - Table `widget_templates` : templates système (globaux) + templates custom par company.
+  - 6 templates système pré-remplis : Contact rapide, Construction, Esthétique, Immobilier, Auto, Général.
+  - Modal de sélection (avec recherche + filtres par catégorie) sur Create & Edit.
+  - Modal de sauvegarde (nom, icône, catégorie) pour créer ses propres templates.
+  - Chargement dynamique : pré-remplit les champs, le layout_mode et le bouton submit.
 
 5. Module 3 – Gestion des Leads & Clients (Mini CRM) (Réalisé ✅)
 - Base Clients (Réalisé ✅) : Table `clients`, gestion des informations clients, liaison avec led leads, factures et devis. Notes internes sur les clients (`client_notes`).
@@ -81,10 +87,22 @@ Créer une plateforme SaaS permettant aux entreprises (construction, esthétique
 - Traductions i18n (Français, Anglais) implémentées pour les factures (Messages, Boutons, Libellés).
 - Statuts de paiement gérés (Brouillon, Envoyée, Payée, En retard, Annulée).
 
-8. Module 6 – Mini Page SEO (⏳)
+8. Module 6 – SuperAdmin Panel (Réalisé ✅)
+- Espace d'administration protégé (`/admin`) avec middleware `EnsureSuperAdmin`.
+- Dashboard global (stats : companies actives, users, leads du mois, revenus, widgets).
+- Gestion des entreprises (CRUD, activation/désactivation) via `AdminCompanyController`.
+- Gestion des utilisateurs (CRUD, activation/désactivation, reset password) via `AdminUserController`.
+- Ghost Mode (impersonation) : connexion en tant qu'un user, bannière visible, retour admin.
+- Partage Inertia `ghost_mode` dans `HandleInertiaRequests.php`.
+- Blocage login des utilisateurs inactifs via middleware `EnsureUserIsActive`.
+- Logging de toutes les actions admin (création, modification, toggle, ghost mode).
+- Layout dédié `AdminLayout.vue` avec bandeau admin + indicateur Ghost Mode.
+- Migrations : `is_super_admin` et `is_active` sur `users`, `is_active` sur `companies`.
+
+9. Module 7 – Mini Page SEO (⏳)
 - Landing page publique pour chaque entreprise générée automatiquement.
 
-9. Roadmap Technique (Mise à jour)
+10. Roadmap Technique (Mise à jour)
 - [x] Onboarding Wizard (Premium UX)
 - [x] Widget Builder (Sécurisé & Honeypot)
 - [x] CRM Pipeline (Kanban + List + Isolation SaaS)
@@ -96,7 +114,8 @@ Créer une plateforme SaaS permettant aux entreprises (construction, esthétique
 - [x] Notifications In-App (cloche) + Email (Immédiat ou Groupé/Heure)
 - [x] CORS configuré (widget ouvert, app restreinte)
 - [x] Scheduler cron-based (queue:work --stop-when-empty toutes les 5 min)
-- [ ] Module SuperAdmin (Option A — voir section 12)
+- [x] Module SuperAdmin (Panel /admin, Ghost Mode, Stats globales, CRUD companies & users)
+- [x] Système de Templates de Widgets (6 templates système + templates custom par company)
 - [ ] Génération PDF natif (Back-end) ou Envoi par Email direct
 - [ ] Portail SEO & Annuaire
 
@@ -118,166 +137,51 @@ Créer une plateforme SaaS permettant aux entreprises (construction, esthétique
 
 ---
 
-12. Module SuperAdmin — Plan de Développement (Option A — À Réaliser)
-=======================================================================
+12. Module SuperAdmin — Réalisé ✅
+===================================
 
-VISION
-------
-Un espace d'administration masqué (/admin), accessible uniquement au(x) super
-administrateur(s) identifiés par un flag `is_super_admin` en base de données.
-Cet espace permet de piloter la plateforme SaaS dans sa globalité, sans
-être limité à une entreprise spécifique (contournement du CompanyScope).
+IMPLÉMENTATION COMPLÈTE
+------------------------
+Espace d'administration sécurisé (`/admin`), accessible uniquement aux super
+administrateurs via le flag `is_super_admin`. Contournement du CompanyScope
+pour voir toutes les données de la plateforme.
 
-ÉTAPE 1 — Base de données & Modèles
--------------------------------------
-Migrations à créer :
-  a) Ajouter `is_super_admin` (boolean, default false) sur la table `users`.
-  b) Ajouter `is_active` (boolean, default true) sur la table `users`.
-  c) Ajouter `is_active` (boolean, default true) sur la table `companies`.
+FICHIERS BACKEND CRÉÉS
+------------------------
+  app/Http/Middleware/EnsureSuperAdmin.php       ✅
+  app/Http/Middleware/EnsureUserIsActive.php      ✅
+  app/Http/Controllers/Admin/AdminController.php  ✅
+  app/Http/Controllers/Admin/AdminCompanyController.php ✅
+  app/Http/Controllers/Admin/AdminUserController.php    ✅
 
-Modèle User :
-  - Ajouter `is_super_admin` et `is_active` au $fillable.
-  - Ajouter méthode helper `isSuperAdmin(): bool`.
+FICHIERS FRONTEND CRÉÉS
+------------------------
+  resources/js/layouts/AdminLayout.vue            ✅
+  resources/js/pages/admin/Dashboard.vue          ✅
+  resources/js/pages/admin/companies/Index.vue    ✅
+  resources/js/pages/admin/companies/Create.vue   ✅
+  resources/js/pages/admin/companies/Show.vue     ✅
+  resources/js/pages/admin/companies/Edit.vue     ✅
+  resources/js/pages/admin/users/Index.vue        ✅
+  resources/js/pages/admin/users/Create.vue       ✅
+  resources/js/pages/admin/users/Edit.vue         ✅
 
-Modèle Company :
-  - Ajouter `is_active` au $fillable.
+Ghost Mode intégré dans AdminLayout.vue (pas de composant séparé).
 
-Seeder SuperAdmin :
-  - Créer/mettre à jour l'utilisateur super admin via DatabaseSeeder ou
-    un artisan command dédié (`php artisan leadflow:make-super-admin`).
+FONCTIONNALITÉS IMPLÉMENTÉES
+------------------------------
+  ✅ Migrations : `is_super_admin` + `is_active` sur `users`, `is_active` sur `companies`
+  ✅ Middleware `EnsureSuperAdmin` (alias `super.admin` dans bootstrap/app.php)
+  ✅ Middleware `EnsureUserIsActive` : bloque les users inactifs à la connexion
+  ✅ Routes admin groupées sous `/admin` avec middleware `['auth','verified','super.admin']`
+  ✅ AdminController : dashboard() avec stats globales, impersonate(), stopImpersonating()
+  ✅ AdminCompanyController : index, create, store, show, edit, update, toggleActive
+  ✅ AdminUserController : index, create, store, edit, update, toggleActive, resetPassword
+  ✅ Ghost Mode : stockage session `impersonating_admin_id`, Auth::loginUsingId()
+  ✅ Partage Inertia `ghost_mode` dans HandleInertiaRequests.php
+  ✅ Logging de toutes les actions admin via Log::channel('single')
+  ✅ Modèle User : `is_super_admin` + `is_active` en $fillable, méthode `isSuperAdmin()`
+  ✅ Modèle Company : `is_active` en $fillable
 
-ÉTAPE 2 — Middleware & Sécurité
----------------------------------
-Créer `app/Http/Middleware/EnsureSuperAdmin.php` :
-  - Vérifie que Auth::user()->is_super_admin === true.
-  - Sinon : abort(403) ou redirection vers le dashboard normal.
-  - Enregistrer le middleware dans bootstrap/app.php sous l'alias `super.admin`.
-
-Vérification supplémentaire :
-  - Bloquer la connexion d'utilisateurs avec `is_active = false`
-    (via FortifyServiceProvider ou un LoginResponse personnalisé).
-
-ÉTAPE 3 — Routes Admin
--------------------------
-Groupe de routes dans routes/web.php :
-  Route::prefix('admin')
-       ->middleware(['auth', 'verified', 'super.admin'])
-       ->name('admin.')
-       ->group(function () {
-           Route::get('/', AdminController@dashboard)          → admin.dashboard
-           Route::resource('companies', AdminCompanyController) → admin.companies.*
-           Route::resource('users',     AdminUserController)    → admin.users.*
-           Route::post('impersonate/{user}', AdminController@impersonate) → admin.impersonate
-           Route::post('stop-impersonating', AdminController@stopImpersonating) → admin.stop-impersonating
-       });
-
-ÉTAPE 4 — Contrôleurs
------------------------
-AdminController (app/Http/Controllers/Admin/) :
-  - dashboard() : Stats globales (nb companies actives, nb users, nb leads ce mois,
-                   revenus totaux facturés ce mois, nb widgets actifs).
-  - impersonate(User $user) : Stocke l'ID admin en session, connecte en tant que $user.
-  - stopImpersonating() : Reconnecte en tant que l'admin original.
-
-AdminCompanyController :
-  - index()   : Liste toutes les entreprises (actives + inactives) + stats par entreprise.
-  - create()  : Formulaire création entreprise (+ utilisateur propriétaire).
-  - store()   : Crée l'entreprise + le user owner dans une transaction.
-  - show()    : Détail d'une entreprise (users, nb leads, nb factures, revenus).
-  - edit()    : Modification infos entreprise.
-  - update()  : Sauvegarde.
-  - toggleActive() : Active/Désactive une entreprise (et ses users par cascade optionnelle).
-
-AdminUserController :
-  - index()         : Liste tous les users (toutes entreprises confondues).
-  - create()        : Formulaire création user + assignation entreprise.
-  - store()         : Création user avec hachage password.
-  - edit()          : Modification user (nom, email, entreprise, rôle).
-  - update()        : Sauvegarde.
-  - toggleActive()  : Active/Désactive un user.
-  - resetPassword() : Génère et envoie un lien de reset par email.
-
-ÉTAPE 5 — Frontend Vue.js / Inertia
---------------------------------------
-Layout dédié : `resources/js/layouts/AdminLayout.vue`
-  - Sidebar différente avec navigation admin uniquement.
-  - Bandeau rouge/orange en haut pour rappeler visuellement qu'on est en mode Admin.
-  - Lien "Quitter l'admin" vers le dashboard normal.
-  - Indicateur "Ghost Mode" visible si on est en train d'usurper un user.
-
-Pages à créer dans `resources/js/pages/admin/` :
-  - Dashboard.vue    : Cartes de stats globales + graphiques (leads/semaine, revenus/mois).
-  - companies/
-      Index.vue      : Tableau de toutes les entreprises avec statut, actions rapides.
-      Create.vue     : Formulaire création entreprise + owner.
-      Show.vue       : Détail entreprise + users de l'entreprise + stats.
-      Edit.vue       : Modification.
-  - users/
-      Index.vue      : Tableau de tous les users avec filtre par entreprise.
-      Create.vue     : Formulaire création user.
-      Edit.vue       : Modification user.
-
-Composant GhostModeBanner.vue :
-  - Barre orange fixe en haut de l'écran montrant "Vous êtes connecté en tant que
-    [Prénom NOM] (entreprise X)" avec un bouton "Quitter le mode Ghost".
-  - Visible dans tous les layouts quand la session contient `impersonating_admin_id`.
-
-ÉTAPE 6 — Ghost Mode (Impersonation)
----------------------------------------
-Mécanisme technique :
-  1. Admin clique "Se connecter en tant que [user]".
-  2. On stocke `session(['impersonating_admin_id' => auth()->id()])`.
-  3. On appelle `Auth::loginUsingId($user->id)`.
-  4. L'app se comporte exactement comme si c'était ce user.
-  5. Le GhostModeBanner est affiché partout (via Inertia shared props).
-  6. Clic "Quitter le mode Ghost" :
-     - Récupère l'ID admin depuis la session.
-     - Reconnecte l'admin.
-     - Supprime la clé session.
-
-Partage Inertia (HandleInertiaRequests.php) :
-  - Ajouter `ghost_mode` : ['active' => bool, 'original_admin_name' => string].
-
-ÉTAPE 7 — Sécurité & Edge Cases
-----------------------------------
-- Un super admin ne peut pas se désactiver lui-même.
-- Un super admin ne peut pas usurper un autre super admin.
-- Toutes les actions admin sont loggées dans `storage/logs/admin_actions.log`
-  (qui, quand, quelle action, sur quel user/company).
-- Le middleware `EnsureSuperAdmin` bloque toute tentative d'accès à /admin
-  si l'user n'est pas super_admin, même s'il connaît l'URL.
-- Si une entreprise est désactivée, ses utilisateurs ne peuvent plus se connecter.
-
-ORDRE D'IMPLÉMENTATION RECOMMANDÉ
-------------------------------------
-1. Migrations (is_super_admin, is_active users & companies)
-2. Middleware EnsureSuperAdmin + blocage login inactifs
-3. Routes admin (squelette vide)
-4. AdminController + dashboard stats
-5. AdminCompanyController + pages companies
-6. AdminUserController + pages users
-7. Ghost Mode (Impersonation)
-8. AdminLayout.vue + GhostModeBanner.vue
-9. Seeder/Command pour créer le premier super admin
-10. Tests manuels de l'isolation (un user normal ne peut PAS accéder à /admin)
-
-FICHIERS À CRÉER (liste complète)
-------------------------------------
-Backend :
-  app/Http/Middleware/EnsureSuperAdmin.php
-  app/Http/Controllers/Admin/AdminController.php
-  app/Http/Controllers/Admin/AdminCompanyController.php
-  app/Http/Controllers/Admin/AdminUserController.php
-  app/Console/Commands/MakeSuperAdmin.php
-
-Frontend :
-  resources/js/layouts/AdminLayout.vue
-  resources/js/components/GhostModeBanner.vue
-  resources/js/pages/admin/Dashboard.vue
-  resources/js/pages/admin/companies/Index.vue
-  resources/js/pages/admin/companies/Create.vue
-  resources/js/pages/admin/companies/Show.vue
-  resources/js/pages/admin/companies/Edit.vue
-  resources/js/pages/admin/users/Index.vue
-  resources/js/pages/admin/users/Create.vue
-  resources/js/pages/admin/users/Edit.vue
+NOTE : La commande Artisan `leadflow:make-super-admin` n'a pas été créée.
+       Le super admin est à créer directement en base de données ou via Tinker.

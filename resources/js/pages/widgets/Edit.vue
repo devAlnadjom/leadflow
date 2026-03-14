@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
-import { GripVertical, Plus, Trash2, Settings2, LayoutList, CheckCircle2, CircleDashed } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
+import { GripVertical, Plus, Trash2, Settings2, LayoutList, CheckCircle2, CircleDashed, BookTemplate, Star } from 'lucide-vue-next';
+
+import WidgetTemplateModal from '@/components/WidgetTemplateModal.vue';
+import SaveWidgetTemplateModal from '@/components/SaveWidgetTemplateModal.vue';
 
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -121,6 +124,28 @@ const submit = (): void => {
 const fieldUsesOptions = (type: FieldInput['type']): boolean => {
     return ['select', 'radio', 'checkbox'].includes(type);
 };
+
+// ── Template modals ────────────────────────────────────────────────────────
+const showTemplateModal = ref(false);
+const showSaveModal     = ref(false);
+
+type WidgetTemplate = {
+    layout_mode: 'stack' | 'slider';
+    submit_button_label: string;
+    fields: FieldInput[];
+};
+
+function loadFromTemplate(template: WidgetTemplate): void {
+    form.layout_mode         = template.layout_mode;
+    form.submit_button_label = template.submit_button_label;
+    form.fields              = template.fields.map((f) => ({
+        label:       f.label,
+        type:        f.type,
+        required:    f.required,
+        placeholder: f.placeholder,
+        options:     f.options ?? [],
+    }));
+}
 </script>
 
 <template>
@@ -133,10 +158,31 @@ const fieldUsesOptions = (type: FieldInput['type']): boolean => {
                     :title="t('widgets.edit_title')"
                     :description="t('widgets.description')"
                 />
-                <Button type="submit" form="widget-form" :disabled="form.processing" class="gap-2">
-                    <CheckCircle2 class="w-4 h-4" />
-                    {{ t('widgets.save_update') }}
-                </Button>
+                <div class="flex items-center gap-2">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        class="gap-2 border-amber-200 text-amber-700 hover:bg-amber-50"
+                        @click="showSaveModal = true"
+                        :disabled="form.fields.length === 0"
+                    >
+                        <Star class="w-4 h-4" />
+                        Sauvegarder
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        class="gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                        @click="showTemplateModal = true"
+                    >
+                        <BookTemplate class="w-4 h-4" />
+                        Charger un modèle
+                    </Button>
+                    <Button type="submit" form="widget-form" :disabled="form.processing" class="gap-2">
+                        <CheckCircle2 class="w-4 h-4" />
+                        {{ t('widgets.save_update') }}
+                    </Button>
+                </div>
             </div>
 
             <form id="widget-form" @submit.prevent="submit" class="grid gap-8 md:grid-cols-[1fr_300px] items-start">
@@ -248,7 +294,7 @@ const fieldUsesOptions = (type: FieldInput['type']): boolean => {
                                     </div>
 
                                     <div class="flex items-center gap-3 pt-2">
-                                        <Switch :checked="field.required" @update:checked="(val) => field.required = val" :id="'req-' + index" />
+                                        <Switch :checked="field.required" @update:checked="(val: boolean) => field.required = val" :id="'req-' + index" />
                                         <Label :for="'req-' + index" class="cursor-pointer font-normal text-slate-600">
                                             {{ t('widgets.field_required') }} (Rendre ce champ obligatoire)
                                         </Label>
@@ -318,7 +364,7 @@ const fieldUsesOptions = (type: FieldInput['type']): boolean => {
                                         <Label class="text-base font-medium text-slate-900">Activer le widget</Label>
                                         <p class="text-sm text-slate-500">Rend le formulaire public et utilisable.</p>
                                     </div>
-                                    <Switch :checked="form.is_active" @update:checked="(val) => form.is_active = val" />
+                                    <Switch :checked="form.is_active" @update:checked="(val: boolean) => form.is_active = val" />
                                 </div>
                             </div>
                         </CardContent>
@@ -328,4 +374,19 @@ const fieldUsesOptions = (type: FieldInput['type']): boolean => {
             </form>
         </div>
     </AppLayout>
+
+    <!-- Template picker modal -->
+    <WidgetTemplateModal
+        v-model:open="showTemplateModal"
+        @load="loadFromTemplate"
+    />
+
+    <!-- Save as template modal -->
+    <SaveWidgetTemplateModal
+        v-model:open="showSaveModal"
+        :fields="form.fields"
+        :layout-mode="form.layout_mode"
+        :submit-button-label="form.submit_button_label"
+        @saved="showSaveModal = false"
+    />
 </template>

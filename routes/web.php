@@ -5,6 +5,7 @@ use App\Http\Controllers\LeadNoteController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\WidgetController;
+use App\Http\Controllers\WidgetTemplateController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -81,6 +82,11 @@ Route::middleware(['auth', 'verified', 'user.active', 'onboarded'])->group(funct
     Route::get('widgets/{leadForm}', [WidgetController::class, 'show'])->name('widgets.show');
     Route::get('widgets/{leadForm}/edit', [WidgetController::class, 'edit'])->name('widgets.edit');
     Route::patch('widgets/{leadForm}', [WidgetController::class, 'update'])->name('widgets.update');
+
+    // Widget Templates
+    Route::get('widget-templates', [WidgetTemplateController::class, 'index'])->name('widget-templates.index');
+    Route::post('widget-templates', [WidgetTemplateController::class, 'store'])->name('widget-templates.store');
+    Route::delete('widget-templates/{widgetTemplate}', [WidgetTemplateController::class, 'destroy'])->name('widget-templates.destroy');
     // Invoices
     Route::get('invoices', [\App\Http\Controllers\InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('clients/{client}/invoices/create', [\App\Http\Controllers\InvoiceController::class, 'create'])->name('invoices.create');
