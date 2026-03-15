@@ -57,7 +57,7 @@ class DashboardController extends Controller
             ],
             'recentInvoices' => $recentInvoices,
             'recentQuotes' => $recentQuotes,
-            'currency' => $settings->currency ?? '€',
+            'currency' => $settings->currency ?? 'USD',
         ]);
     }
 }

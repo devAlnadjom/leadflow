@@ -102,6 +102,7 @@ interface ClientPayload {
 const props = defineProps<{
     client: ClientPayload;
     availableTags?: Tag[];
+    currency: string;
 }>();
 
 const noteForm = useForm({
@@ -257,7 +258,7 @@ const invoiceStatuses: Record<string, { label: string; class: string }> = {
 };
 
 const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: props.currency || 'USD' }).format(value);
 };
 </script>
 

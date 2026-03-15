@@ -50,7 +50,7 @@ const stopImpersonating = () => {
                         <span class="text-white text-xs font-black">S</span>
                     </div>
                     <div>
-                        <p class="text-xs font-bold text-white leading-none">LeadFlow</p>
+                        <p class="text-xs font-bold text-white leading-none">clientux</p>
                         <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest">Super Admin</p>
                     </div>
                 </div>

@@ -122,6 +122,7 @@ class ClientController extends Controller
                 'tags' => $record->tags->map(fn ($t) => ['id' => $t->id, 'name' => $t->name, 'color' => $t->color])->toArray(),
             ],
             'availableTags' => \App\Models\Tag::query()->orderBy('name')->get(['id', 'name', 'color']),
+            'currency' => $company->settings->currency ?? 'USD',
         ]);
     }
 

@@ -15,12 +15,12 @@ withDefaults(
 
 const faqs = [
     {
-        question: "Qu'est-ce que Leadflow exactement ?",
-        answer: "Leadflow est une plateforme tout-en-un conçue pour les entreprises de services. Elle combine un générateur de formulaires pour capturer des prospects, un CRM simplifié pour gérer les clients, et un outil de devis et facturation avec mentions légales configurables."
+        question: "Qu'est-ce que clientux exactement ?",
+        answer: "clientux est une plateforme tout-en-un conçue pour les entreprises de services. Elle combine un générateur de formulaires pour capturer des prospects, un CRM simplifié pour gérer les clients, et un outil de devis et facturation avec mentions légales configurables."
     },
     {
         question: "Comment s'intègre le widget lead sur mon site ?",
-        answer: "C'est très simple ! Vous créez votre formulaire personnalisé dans Leadflow avec un système anti-spam invisible, et nous vous donnons un petit bout de code à copier-coller sur votre site (WordPress, Wix, Shopify...). Il apparaîtra instantanément."
+        answer: "C'est très simple ! Vous créez votre formulaire personnalisé dans clientux avec un système anti-spam invisible, et nous vous donnons un petit bout de code à copier-coller sur votre site (WordPress, Wix, Shopify...). Il apparaîtra instantanément."
     },
     {
         question: "Est-ce difficile de créer des devis et factures ?",
@@ -44,7 +44,7 @@ const toggleFaq = (index: number) => {
 </script>
 
 <template>
-    <Head title="Leadflow - Générez et gérez vos leads plus intelligemment" />
+    <Head title="clientux - Générez et gérez vos leads plus intelligemment" />
     
     <div class="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-500 selection:text-white dark:bg-slate-950 dark:text-white">
         <!-- Navigation -->
@@ -55,7 +55,7 @@ const toggleFaq = (index: number) => {
                         <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg">
                             <Zap class="h-6 w-6" />
                         </div>
-                        <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Leadflow</span>
+                        <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">clientux</span>
                     </div>
                 </div>
                 
@@ -200,7 +200,7 @@ const toggleFaq = (index: number) => {
                         L'outil complet pour les entreprises locales
                     </p>
                     <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">
-                        Leadflow réunit tous les outils dont vous avez besoin pour capturer des prospects, les convertir en clients, et gérer la facturation.
+                        clientux réunit tous les outils dont vous avez besoin pour capturer des prospects, les convertir en clients, et gérer la facturation.
                     </p>
                 </div>
                 
@@ -260,9 +260,9 @@ const toggleFaq = (index: number) => {
             <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
             <div class="mx-auto max-w-7xl px-6 lg:px-8 relative">
                 <div class="mx-auto max-w-2xl text-center">
-                    <h2 class="text-base font-semibold leading-7 text-indigo-600 dark:text-indigo-400">À qui s'adresse Leadflow ?</h2>
+                    <h2 class="text-base font-semibold leading-7 text-indigo-600 dark:text-indigo-400">À qui s'adresse clientux ?</h2>
                     <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">Conçu pour ceux qui font grandir leur activité</p>
-                    <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">Que vous soyez artisan, agence ou prestataire de services, Leadflow s'adapte à votre manière de travailler pour vous aider à convertir plus de prospects.</p>
+                    <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">Que vous soyez artisan, agence ou prestataire de services, clientux s'adapte à votre manière de travailler pour vous aider à convertir plus de prospects.</p>
                 </div>
                 
                 <div class="mx-auto mt-16 max-w-7xl">
@@ -403,10 +403,10 @@ const toggleFaq = (index: number) => {
             <div class="mx-auto max-w-7xl px-6 lg:px-8 text-center sm:text-left flex flex-col sm:flex-row justify-between items-center">
                 <div class="flex items-center gap-2 mb-4 sm:mb-0">
                     <Zap class="h-5 w-5 text-indigo-600" />
-                    <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Leadflow</span>
+                    <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">clientux</span>
                 </div>
                 <p class="text-sm leading-5 text-slate-500 dark:text-slate-400">
-                    &copy; {{ new Date().getFullYear() }} Leadflow Inc. Tous droits réservés.
+                    &copy; {{ new Date().getFullYear() }} clientux Inc. Tous droits réservés.
                 </p>
                 <div class="flex gap-4 mt-4 sm:mt-0 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer">
                     Termes et conditions

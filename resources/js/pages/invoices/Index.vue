@@ -55,6 +55,7 @@ interface Props {
         search: string;
         status: string;
     };
+    currency: string;
 }
 
 const props = defineProps<Props>();
@@ -101,11 +102,18 @@ const getInvoicesByStatus = (statusId: string) => {
     return props.invoices.data.filter(i => i.status === statusId);
 };
 
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: props.currency || 'USD',
+    }).format(amount);
+};
+
 const getStatusTotal = (statusId: string) => {
     const total = props.invoices.data
         .filter(i => i.status === statusId)
         .reduce((sum, i) => sum + Number(i.total || 0), 0);
-    return total > 0 ? `${total.toFixed(0)}€` : '';
+    return total > 0 ? formatCurrency(total) : '';
 };
 
 const totalAmount = computed(() => {
@@ -230,7 +238,7 @@ const totalAmount = computed(() => {
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-right">
-                                    <span class="font-bold text-slate-900">{{ Number(invoice.total).toFixed(2) }}€</span>
+                                    <span class="font-bold text-slate-900">{{ formatCurrency(Number(invoice.total)) }}</span>
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center text-xs text-slate-500 gap-1 font-mono" v-if="invoice.due_date">
@@ -271,7 +279,7 @@ const totalAmount = computed(() => {
                 <span class="text-sm text-muted-foreground hidden sm:inline-block">
                     {{ invoices.data.length }} {{ t('invoices.displayed') }}
                     <span v-if="totalAmount > 0" class="ml-2 font-semibold text-slate-700">
-                        · {{ t('invoices.total') }}: {{ totalAmount.toFixed(2) }}€
+                        · {{ t('invoices.total') }}: {{ formatCurrency(totalAmount) }}
                     </span>
                 </span>
                 <div class="flex flex-wrap items-center gap-1 ml-auto">

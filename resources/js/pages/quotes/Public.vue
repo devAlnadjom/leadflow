@@ -341,7 +341,7 @@ const statusConfig = computed(() => {
 
             <!-- Footer -->
             <div class="text-center text-[11px] text-slate-400 font-medium py-8" :class="{'mb-20 sm:mb-0': !isDraft && isPending}">
-                <p>Créé par {{ company.name }} grâce à <span class="font-bold text-slate-500">LeadFlow</span></p>
+                <p>Créé par {{ company.name }} grâce à <span class="font-bold text-slate-500">clientux</span></p>
                 <p class="mt-1 opacity-50">Ref: {{ quote.public_uid }}</p>
             </div>
             

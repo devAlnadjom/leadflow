@@ -45,11 +45,11 @@ class LeadReceivedNotification extends Notification implements ShouldQueue
     {
         $leadName = $this->lead->name ?? 'Anonyme';
         $leadEmail = $this->lead->email ?? 'Non renseigné';
-        
+
         return (new MailMessage)
             ->subject('Nouveau Prospect (Lead) reçu : ' . $leadName)
             ->greeting('Bonjour ' . $notifiable->name . ' !')
-            ->line('Vous venez de recevoir un nouveau prospect via votre widget : **' . ($this->lead->leadForm->name ?? 'Widget LeadFlow') . '**.')
+            ->line('Vous venez de recevoir un nouveau prospect via votre widget : **' . ($this->lead->leadForm->name ?? 'Widget clientux') . '**.')
             ->line('Nom : ' . $leadName)
             ->line('Email : ' . $leadEmail)
             ->action('Voir le prospect', url('/leads/' . $this->lead->id))

@@ -189,7 +189,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
                     <div class="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-2xl p-6 text-white shadow-[0_8px_30px_rgb(79,70,229,0.2)] group relative overflow-hidden flex-1 flex flex-col justify-center border border-indigo-400/20">
                         <div class="relative z-10 text-center">
                             <h3 class="font-bold text-xs mb-2 text-indigo-200 uppercase tracking-[0.2em]">{{ t('invoices.total_invoice') }}</h3>
-                            <p class="text-4xl md:text-5xl font-black tracking-tight drop-shadow-sm">{{ total.toFixed(2) }}<span class="text-2xl ml-1 font-bold text-indigo-300">{{ settings.currency || '€' }}</span></p>
+                            <p class="text-4xl md:text-5xl font-black tracking-tight drop-shadow-sm">{{ total.toFixed(2) }}<span class="text-2xl ml-1 font-bold text-indigo-300">{{ settings.currency || 'USD' }}</span></p>
                         </div>
                         <div class="absolute -right-12 -bottom-12 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700 ease-out"></div>
                         <div class="absolute -left-8 -top-8 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
@@ -223,14 +223,14 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
                             <label class="sm:hidden text-[11px] font-bold uppercase text-slate-400 mb-1.5 block">{{ t('invoices.unit_price') }}</label>
                             <div class="relative">
                                 <Input v-model.number="item.unit_price" type="number" min="0" step="0.01" class="h-11 text-right pr-7 bg-slate-50/50 border-slate-200 shadow-none font-semibold focus:bg-white" />
-                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">{{ settings.currency || '€' }}</span>
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">{{ settings.currency || 'USD' }}</span>
                             </div>
                         </div>
 
                         <div class="col-span-1 sm:col-span-2 lg:col-span-2 flex items-center justify-between sm:justify-end sm:pr-8 pt-2 sm:pt-0">
                             <label class="sm:hidden text-[11px] font-bold uppercase text-slate-400">{{ t('invoices.total_ht') }}</label>
                             <div class="font-black text-slate-800 text-lg tabular-nums">
-                                {{ (item.quantity * item.unit_price).toFixed(2) }}<span class="text-xs ml-0.5 text-slate-400 font-bold">{{ settings.currency || '€' }}</span>
+                                {{ (item.quantity * item.unit_price).toFixed(2) }}<span class="text-xs ml-0.5 text-slate-400 font-bold">{{ settings.currency || 'USD' }}</span>
                             </div>
                         </div>
 
@@ -256,7 +256,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
                     <div class="w-full sm:w-80 space-y-3 bg-slate-50/80 p-5 rounded-2xl border border-slate-100">
                         <div class="flex justify-between items-center text-sm font-bold text-slate-900 leading-tight">
                             <span>{{ t('invoices.subtotal_ht') }}</span>
-                            <span class="font-bold text-slate-700 tabular-nums">{{ subtotal.toFixed(2) }} {{ settings.currency || '€' }}</span>
+                            <span class="font-bold text-slate-700 tabular-nums">{{ subtotal.toFixed(2) }} {{ settings.currency || 'USD' }}</span>
                         </div>
                         <div class="flex justify-between items-center text-sm font-bold text-slate-900 leading-tight" v-if="settings.tax1_name">
                             <div class="flex items-center gap-2">
@@ -264,7 +264,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
                                 <Input type="number" step="0.001" v-model.number="form.tax1_rate" class="h-7 w-20 text-right text-xs px-2 py-0 border-slate-200" />
                                 <span class="text-xs text-slate-400">%</span>
                             </div>
-                            <span class="font-bold text-slate-700 tabular-nums text-right">{{ tax1Amount.toFixed(2) }} {{ settings.currency || '€' }}</span>
+                            <span class="font-bold text-slate-700 tabular-nums text-right">{{ tax1Amount.toFixed(2) }} {{ settings.currency || 'USD' }}</span>
                         </div>
                         <div class="flex justify-between items-center text-sm font-bold text-slate-900 leading-tight" v-if="settings.tax2_name">
                             <div class="flex items-center gap-2">
@@ -272,11 +272,11 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
                                 <Input type="number" step="0.001" v-model.number="form.tax2_rate" class="h-7 w-20 text-right text-xs px-2 py-0 border-slate-200" />
                                 <span class="text-xs text-slate-400">%</span>
                             </div>
-                            <span class="font-bold text-slate-700 tabular-nums text-right">{{ tax2Amount.toFixed(2) }} {{ settings.currency || '€' }}</span>
+                            <span class="font-bold text-slate-700 tabular-nums text-right">{{ tax2Amount.toFixed(2) }} {{ settings.currency || 'USD' }}</span>
                         </div>
                         <div class="pt-4 mt-2 border-t border-slate-200 flex justify-between items-end">
                             <span class="text-xs font-black text-slate-900 uppercase tracking-widest leading-none mb-1">{{ t('invoices.total_ttc') }}</span>
-                            <span class="text-3xl font-black text-indigo-600 tabular-nums leading-none">{{ total.toFixed(2) }}<span class="text-base font-bold ml-1 opacity-70">{{ settings.currency || '€' }}</span></span>
+                            <span class="text-3xl font-black text-indigo-600 tabular-nums leading-none">{{ total.toFixed(2) }}<span class="text-base font-bold ml-1 opacity-70">{{ settings.currency || 'USD' }}</span></span>
                         </div>
                     </div>
                 </div>

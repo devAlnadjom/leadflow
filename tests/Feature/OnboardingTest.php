@@ -17,20 +17,20 @@ it('stores company profile and attaches it to the user', function () {
 
     $this->actingAs($user)
         ->post(route('onboarding.company.store'), [
-            'name' => 'LeadFlow Construction',
-            'phone' => '+1 514 555 0000',
-            'email' => 'info@leadflow.test',
-            'industry' => 'Construction',
-            'address' => '123 Rue Principale',
-            'served_areas' => ['Montreal', 'Laval'],
-            'primary_color' => '#1D4ED8',
-            'secondary_color' => '#0F172A',
-            'quote_prefix' => 'DEV',
-            'invoice_prefix' => 'FAC',
-            'default_tax_rate' => 14.975,
-            'currency' => 'CAD',
-            'terms_and_conditions' => 'Paiable a reception.',
-        ])
+        'name' => 'clientux Construction',
+        'phone' => '+1 514 555 0000',
+        'email' => 'info@clientux.test',
+        'industry' => 'Construction',
+        'address' => '123 Rue Principale',
+        'served_areas' => ['Montreal', 'Laval'],
+        'primary_color' => '#1D4ED8',
+        'secondary_color' => '#0F172A',
+        'quote_prefix' => 'DEV',
+        'invoice_prefix' => 'FAC',
+        'default_tax_rate' => 14.975,
+        'currency' => 'CAD',
+        'terms_and_conditions' => 'Paiable a reception.',
+    ])
         ->assertRedirect(route('dashboard'));
 
     $user->refresh();
@@ -39,7 +39,7 @@ it('stores company profile and attaches it to the user', function () {
 
     $this->assertDatabaseHas('companies', [
         'id' => $user->company_id,
-        'name' => 'LeadFlow Construction',
+        'name' => 'clientux Construction',
         'industry' => 'Construction',
     ]);
 

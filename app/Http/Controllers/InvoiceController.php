@@ -50,12 +50,15 @@ class InvoiceController extends Controller
                 'client_id' => $invoice->client?->id,
             ]);
 
+        $settings = $request->user()->company->settings;
+
         return Inertia::render('invoices/Index', [
             'invoices' => $invoices,
             'filters' => [
                 'search' => $search,
                 'status' => $status,
             ],
+            'currency' => $settings->currency ?? 'USD',
         ]);
     }
 

@@ -111,7 +111,7 @@ const steps = [
             <!-- Header -->
             <div class="text-center space-y-2 mb-4">
                 <h1 class="text-3xl font-bold tracking-tight text-slate-900">
-                    Bienvenue sur LeadFlow
+                    Bienvenue sur clientux
                 </h1>
                 <p class="text-slate-500 max-w-xl mx-auto">
                     Commençons par configurer votre espace de travail. Cela ne prendra que quelques minutes.

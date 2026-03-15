@@ -32,7 +32,7 @@ class BatchedLeadSummary extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Résumé de vos nouveaux leads (LeadFlow)',
+            subject: 'Résumé de vos nouveaux leads (clientux)',
         );
     }
 

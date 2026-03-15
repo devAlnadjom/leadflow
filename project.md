@@ -183,5 +183,5 @@ FONCTIONNALITÉS IMPLÉMENTÉES
   ✅ Modèle User : `is_super_admin` + `is_active` en $fillable, méthode `isSuperAdmin()`
   ✅ Modèle Company : `is_active` en $fillable
 
-NOTE : La commande Artisan `leadflow:make-super-admin` n'a pas été créée.
+NOTE : La commande Artisan `clientux:make-super-admin` n'a pas été créée.
        Le super admin est à créer directement en base de données ou via Tinker.

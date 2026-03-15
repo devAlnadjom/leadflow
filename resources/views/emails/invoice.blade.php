@@ -41,7 +41,7 @@
         </div>
         
         <div class="footer">
-            <p>Créé et envoyé par {{ $invoice->company->name }} <br> via <strong>LeadFlow</strong></p>
+            <p>Créé et envoyé par {{ $invoice->company->name }} <br> via <strong>clientux</strong></p>
         </div>
     </div>
 </body>

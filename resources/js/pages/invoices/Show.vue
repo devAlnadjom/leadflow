@@ -96,7 +96,7 @@ const updateStatus = (status: string) => {
 };
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString('fr-FR');
-const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(val);
+const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: props.settings.currency || 'USD' }).format(val);
 
 const publicUrl = computed(() => `${globalThis.location?.origin ?? ''}/facture/${props.invoice.public_uid}`);
 
@@ -185,7 +185,7 @@ const sendEmail = () => {
                         <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-6">
                             <Briefcase class="w-10 h-10 text-white" />
                         </div>
-                        <h2 class="text-4xl font-black text-slate-900 tracking-tighter uppercase italic">LeadFlow</h2>
+                        <h2 class="text-4xl font-black text-slate-900 tracking-tighter uppercase italic">clientux</h2>
                         <p class="text-slate-400 text-sm font-bold tracking-widest mt-1">CRM & FACTURATION</p>
                     </div>
                     
@@ -213,7 +213,7 @@ const sendEmail = () => {
                                 <p class="font-bold text-slate-900 text-lg">{{ t('invoices.your_company') }}</p>
                                 <p>123 Avenue du Success</p>
                                 <p>75001 Paris, France</p>
-                                <p class="text-sm pt-2 flex items-center gap-2"><Mail class="w-3.5 h-3.5" /> hello@leadflow.test</p>
+                                <p class="text-sm pt-2 flex items-center gap-2"><Mail class="w-3.5 h-3.5" /> hello@clientux.test</p>
                             </div>
                         </div>
                     </div>
@@ -286,8 +286,8 @@ const sendEmail = () => {
                                     <p class="font-bold text-slate-900">{{ item.description }}</p>
                                 </td>
                                 <td class="py-5 text-center text-slate-600 font-medium">{{ Number(item.quantity) }}</td>
-                                <td class="py-5 text-right text-slate-600 font-medium">{{ Number(item.unit_price).toFixed(2) }}{{ settings.currency || '€' }}</td>
-                                <td class="py-5 text-right font-black text-slate-900">{{ (item.quantity * item.unit_price).toFixed(2) }}{{ settings.currency || '€' }}</td>
+                                <td class="py-5 text-right text-slate-600 font-medium">{{ Number(item.unit_price).toFixed(2) }}{{ settings.currency || 'USD' }}</td>
+                                <td class="py-5 text-right font-black text-slate-900">{{ (item.quantity * item.unit_price).toFixed(2) }}{{ settings.currency || 'USD' }}</td>
                             </tr>
                         </tbody>
                         <tfoot>

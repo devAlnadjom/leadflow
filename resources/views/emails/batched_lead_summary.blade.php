@@ -8,7 +8,7 @@
     
     <h2>Bonjour {{ $user->name }},</h2>
 
-    <p>Vous avez reçu <strong>{{ $leadCount }}</strong> nouveau(x) prospect(s) au cours de la dernière heure via vos widgets LeadFlow.</p>
+    <p>Vous avez reçu <strong>{{ $leadCount }}</strong> nouveau(x) prospect(s) au cours de la dernière heure via vos widgets clientux.</p>
 
     <div style="margin: 30px 0;">
         <a href="{{ url('/leads') }}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">

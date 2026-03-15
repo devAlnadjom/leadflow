@@ -32,7 +32,7 @@ const statCards = [
         <div class="p-8">
             <div class="mb-8">
                 <h1 class="text-2xl font-bold text-white">Tableau de bord</h1>
-                <p class="text-slate-400 text-sm mt-1">Vue globale de la plateforme LeadFlow</p>
+                <p class="text-slate-400 text-sm mt-1">Vue globale de la plateforme clientux</p>
             </div>
 
             <!-- Stat Cards -->

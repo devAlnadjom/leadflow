@@ -182,7 +182,7 @@ const activeTab = ref('details');
 const dynamicPayloadFields = computed(() => {
     const p = props.lead.payload;
     if (!p) return [];
-    return Object.keys(p).filter(k => k !== '_leadflow_email').map(key => ({
+    return Object.keys(p).filter(k => k !== '_clientux_email').map(key => ({
         label: key,
         value: p[key]
     }));
@@ -375,7 +375,7 @@ const activities = computed(() => {
 </script>
 
 <template>
-    <Head :title="`${lead.name || t('leads.show_title')} | LeadFlow`" />
+    <Head :title="`${lead.name || t('leads.show_title')} | clientux`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="h-full flex flex-col bg-slate-50 min-h-screen">

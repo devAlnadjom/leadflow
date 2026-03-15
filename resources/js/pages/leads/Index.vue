@@ -98,10 +98,10 @@ const removeLead = (id: number): void => {
 };
 
 // View mode
-const viewMode = ref(localStorage.getItem('leadflow_view_mode') || 'kanban');
+const viewMode = ref(localStorage.getItem('clientux_view_mode') || 'kanban');
 const setViewMode = (mode: string) => {
     viewMode.value = mode;
-    localStorage.setItem('leadflow_view_mode', mode);
+    localStorage.setItem('clientux_view_mode', mode);
 };
 
 // Kanban statuses

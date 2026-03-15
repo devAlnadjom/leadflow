@@ -58,7 +58,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
         style: 'currency',
-        currency: props.currency === '€' ? 'EUR' : (props.currency === '$' ? 'USD' : props.currency),
+        currency: props.currency || 'USD',
     }).format(amount);
 };
 

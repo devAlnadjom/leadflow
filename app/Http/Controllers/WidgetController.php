@@ -43,7 +43,7 @@ class WidgetController extends Controller
     };
 
     var container = document.createElement('div');
-    container.id = 'leadflow-widget-' + uid;
+    container.id = 'clientux-widget-' + uid;
     container.style.position = 'fixed';
     container.style.bottom = '20px';
     container.style.right = '20px';
@@ -98,7 +98,7 @@ class WidgetController extends Controller
         if (field.type === 'radio' || field.type === 'checkbox') {
             var groupName = key + (field.type === 'checkbox' ? '[]' : '');
             var groupOptions = (field.options || []).map(function (opt, optionIndex) {
-                var inputId = 'leadflow-' + uid + '-' + index + '-' + optionIndex;
+                var inputId = 'clientux-' + uid + '-' + index + '-' + optionIndex;
                 return '<label for="' + inputId + '" style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:6px;">'
                     + '<input id="' + inputId + '" type="' + field.type + '" name="' + groupName + '" value="' + escapeHtml(opt) + '">'
                     + escapeHtml(opt)
@@ -213,7 +213,7 @@ class WidgetController extends Controller
     }
 
     function showMessage(message, isError) {
-        var msg = document.getElementById('leadflow-widget-msg-' + uid);
+        var msg = document.getElementById('clientux-widget-msg-' + uid);
         if (!msg) return;
         msg.style.display = 'block';
         msg.style.color = isError ? '#991b1b' : '#166534';
@@ -274,32 +274,32 @@ class WidgetController extends Controller
                 if (layoutMode === 'slider' && allFields.length > 1) {
                     sliderNavigationHtml =
                         '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 10px;">'
-                        + '<button type="button" id="leadflow-widget-prev-' + uid + '" style="background:#fff;border:1px solid #cbd5e1;color:#334155;border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;" ' + (state.step === 0 ? 'disabled' : '') + '>Previous</button>'
+                        + '<button type="button" id="clientux-widget-prev-' + uid + '" style="background:#fff;border:1px solid #cbd5e1;color:#334155;border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;" ' + (state.step === 0 ? 'disabled' : '') + '>Previous</button>'
                         + '<span style="font-size:12px;color:#64748b;">Step ' + (state.step + 1) + ' / ' + allFields.length + '</span>'
-                        + '<button type="button" id="leadflow-widget-next-' + uid + '" style="background:#fff;border:1px solid #cbd5e1;color:#334155;border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;" ' + (isLastStep ? 'disabled' : '') + '>Next</button>'
+                        + '<button type="button" id="clientux-widget-next-' + uid + '" style="background:#fff;border:1px solid #cbd5e1;color:#334155;border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;" ' + (isLastStep ? 'disabled' : '') + '>Next</button>'
                         + '</div>';
                 }
 
                 container.innerHTML =
                     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
                     + '<div style="font-size:16px;font-weight:600;">' + title + '</div>'
-                    + '<button type="button" id="leadflow-widget-toggle-' + uid + '" style="background:#fff;border:1px solid #cbd5e1;border-radius:999px;width:30px;height:30px;cursor:pointer;">' + (state.collapsed ? '+' : '-') + '</button>'
+                    + '<button type="button" id="clientux-widget-toggle-' + uid + '" style="background:#fff;border:1px solid #cbd5e1;border-radius:999px;width:30px;height:30px;cursor:pointer;">' + (state.collapsed ? '+' : '-') + '</button>'
                     + '</div>'
-                    + '<div id="leadflow-widget-body-' + uid + '" style="' + (state.collapsed ? 'display:none;' : '') + '">'
+                    + '<div id="clientux-widget-body-' + uid + '" style="' + (state.collapsed ? 'display:none;' : '') + '">'
                     + (allFields.length === 0
                         ? '<p style="margin:8px 0 0;color:#64748b;font-size:13px;">No fields configured for this widget.</p>'
-                        : '<form id="leadflow-widget-form-' + uid + '">'
-                        + '<div style="position:absolute;left:-9999px;top:-9999px;"><label for="leadflow-hp-' + uid + '">Leave this field empty</label><input type="text" id="leadflow-hp-' + uid + '" name="_website_url_hp" tabindex="-1" autocomplete="new-password"></div>'
+                        : '<form id="clientux-widget-form-' + uid + '">'
+                        + '<div style="position:absolute;left:-9999px;top:-9999px;"><label for="clientux-hp-' + uid + '">Leave this field empty</label><input type="text" id="clientux-hp-' + uid + '" name="_website_url_hp" tabindex="-1" autocomplete="new-password"></div>'
                         + fieldsHtml
                         + sliderNavigationHtml
                         + ((layoutMode === 'stack' || isLastStep)
                             ? '<button type="submit" style="width:100%;background:#0f172a;color:#fff;border:0;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;">' + buttonLabel + '</button>'
                             : '')
-                        + '<p id="leadflow-widget-msg-' + uid + '" style="display:none;margin-top:10px;font-size:13px;"></p>'
+                        + '<p id="clientux-widget-msg-' + uid + '" style="display:none;margin-top:10px;font-size:13px;"></p>'
                         + '</form>')
                     + '</div>';
 
-                var toggle = document.getElementById('leadflow-widget-toggle-' + uid);
+                var toggle = document.getElementById('clientux-widget-toggle-' + uid);
                 if (toggle) {
                     toggle.addEventListener('click', function () {
                         state.collapsed = !state.collapsed;
@@ -307,12 +307,12 @@ class WidgetController extends Controller
                     });
                 }
 
-                var form = document.getElementById('leadflow-widget-form-' + uid);
+                var form = document.getElementById('clientux-widget-form-' + uid);
                 if (!form) return;
 
                 restoreVisibleFields(form, visibleFields);
 
-                var previousButton = document.getElementById('leadflow-widget-prev-' + uid);
+                var previousButton = document.getElementById('clientux-widget-prev-' + uid);
                 if (previousButton) {
                     previousButton.addEventListener('click', function () {
                         updateStateFromVisibleFields(form, visibleFields);
@@ -323,7 +323,7 @@ class WidgetController extends Controller
                     });
                 }
 
-                var nextButton = document.getElementById('leadflow-widget-next-' + uid);
+                var nextButton = document.getElementById('clientux-widget-next-' + uid);
                 if (nextButton) {
                     nextButton.addEventListener('click', function () {
                         updateStateFromVisibleFields(form, visibleFields);

@@ -93,7 +93,7 @@ const setViewMode = (mode: string) => {
 </script>
 
 <template>
-    <Head title="Clients | LeadFlow" />
+    <Head title="Clients | clientux" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-5 p-4 md:p-6 lg:p-8 bg-slate-50 min-h-screen">

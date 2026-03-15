@@ -76,7 +76,7 @@ const statuses = computed(() => ({
 }));
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString('fr-FR');
-const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(val);
+const formatCurrency = (val: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: props.settings.currency || 'USD' }).format(val);
 
 </script>
 

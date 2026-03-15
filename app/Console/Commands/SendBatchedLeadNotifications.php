@@ -15,7 +15,7 @@ class SendBatchedLeadNotifications extends Command
      *
      * @var string
      */
-    protected $signature = 'leadflow:send-batched-notifications';
+    protected $signature = 'clientux:send-batched-notifications';
 
     /**
      * The console command description.
