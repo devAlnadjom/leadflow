@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { dashboard, login, register } from '@/routes';
-import { ArrowRight, BarChart3, Users, Zap, CheckCircle2, LayoutTemplate, Briefcase, Plus, Minus, ChevronDown, Receipt, ShieldCheck, Hammer, Heart, Building2, Home } from 'lucide-vue-next';
+import { useI18n } from '@/composables/useI18n';
+import { ArrowRight, BarChart3, Users, Zap, CheckCircle2, LayoutTemplate, Briefcase, Plus, Minus, ChevronDown, Receipt, ShieldCheck, Hammer, Heart, Building2, Home, Menu, X } from 'lucide-vue-next';
 
 withDefaults(
     defineProps<{
@@ -13,30 +14,18 @@ withDefaults(
     },
 );
 
-const faqs = [
-    {
-        question: "Qu'est-ce que clientux exactement ?",
-        answer: "clientux est une plateforme tout-en-un conçue pour les entreprises de services. Elle combine un générateur de formulaires pour capturer des prospects, un CRM simplifié pour gérer les clients, et un outil de devis et facturation avec mentions légales configurables."
-    },
-    {
-        question: "Comment s'intègre le widget lead sur mon site ?",
-        answer: "C'est très simple ! Vous créez votre formulaire personnalisé dans clientux avec un système anti-spam invisible, et nous vous donnons un petit bout de code à copier-coller sur votre site (WordPress, Wix, Shopify...). Il apparaîtra instantanément."
-    },
-    {
-        question: "Est-ce difficile de créer des devis et factures ?",
-        answer: "Pas du tout ! Vous générez automatiquement des devis et factures professionnels avec calcul automatique des taxes. Les devis peuvent être partagés par lien sécurisé, et les factures disposent d'un design pensé pour l'impression propre (PDF) incluant vos mentions légales personnalisées."
-    },
-    {
-        question: "Puis-je gérer mes clients sur le long terme ?",
-        answer: "Oui, la gestion des clients est centralisée. Chaque client dispose d'une fiche contenant tous ses devis, toutes ses factures, ainsi qu'un système de notes internes et de suivi (Timeline) pour tout votre historique."
-    },
-    {
-        question: "Ai-je besoin d'une carte de crédit pour essayer ?",
-        answer: "Non, aucune carte bancaire n'est requise. Vous disposez d'un essai gratuit pour explorer toutes nos fonctionnalités."
-    }
-];
+const { t } = useI18n();
+
+const faqs = computed(() => [
+    { question: t('landing.faq1_q'), answer: t('landing.faq1_a') },
+    { question: t('landing.faq2_q'), answer: t('landing.faq2_a') },
+    { question: t('landing.faq3_q'), answer: t('landing.faq3_a') },
+    { question: t('landing.faq4_q'), answer: t('landing.faq4_a') },
+    { question: t('landing.faq5_q'), answer: t('landing.faq5_a') },
+]);
 
 const openFaq = ref<number | null>(0);
+const mobileMenuOpen = ref(false);
 
 const toggleFaq = (index: number) => {
     openFaq.value = openFaq.value === index ? null : index;
@@ -44,46 +33,146 @@ const toggleFaq = (index: number) => {
 </script>
 
 <template>
-    <Head title="clientux - Générez et gérez vos leads plus intelligemment" />
+    <Head :title="t('landing.meta_title')">
+        <meta name="description" :content="t('landing.meta_description')" />
+        <meta name="keywords" content="CRM, devis en ligne, facturation, gestion clients, leads, prospects, SaaS, PME, entreprise, formulaire, widget" />
+        <meta name="author" content="clientux" />
+        <meta name="robots" content="index, follow" />
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:title" :content="t('landing.meta_og_title')" />
+        <meta property="og:description" :content="t('landing.meta_og_description')" />
+        <meta property="og:site_name" content="clientux" />
+        
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" :content="t('landing.meta_og_title')" />
+        <meta name="twitter:description" :content="t('landing.meta_og_description')" />
+    </Head>
     
     <div class="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-500 selection:text-white dark:bg-slate-950 dark:text-white">
         <!-- Navigation -->
         <nav class="absolute inset-x-0 top-0 z-50">
-            <div class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
+            <div class="mx-auto flex max-w-7xl items-center justify-between p-4 sm:p-6 lg:px-8" aria-label="Global">
                 <div class="flex lg:flex-1">
                     <div class="flex items-center gap-2">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg">
-                            <Zap class="h-6 w-6" />
+                        <div class="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg">
+                            <Zap class="h-5 w-5 sm:h-6 sm:w-6" />
                         </div>
-                        <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">clientux</span>
+                        <span class="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">clientux</span>
                     </div>
                 </div>
                 
-                <div class="flex flex-1 justify-end gap-x-4">
+                <!-- Mobile menu button -->
+                <div class="flex sm:hidden">
+                    <button
+                        type="button"
+                        class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-slate-700 dark:text-slate-300"
+                        @click="mobileMenuOpen = true"
+                        aria-label="Ouvrir le menu"
+                    >
+                        <Menu class="h-6 w-6" />
+                    </button>
+                </div>
+
+                <!-- Desktop nav buttons -->
+                <div class="hidden sm:flex flex-1 justify-end gap-x-4">
                     <Link
                         v-if="$page.props.auth.user"
                         :href="dashboard()"
                         class="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-700 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
                     >
-                        Accéder au Dashboard
+                        {{ t('landing.go_to_dashboard') }}
                     </Link>
                     <template v-else>
                         <Link
                             :href="login()"
                             class="rounded-full px-5 py-2.5 text-sm font-semibold leading-6 text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
                         >
-                            Connexion
+                            {{ t('landing.login') }}
                         </Link>
                         <Link
                             v-if="canRegister"
                             :href="register()"
                             class="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
-                            Démarrer gratuitement
+                            {{ t('landing.register') }}
                         </Link>
                     </template>
                 </div>
             </div>
+
+            <!-- Mobile menu panel -->
+            <transition
+                enter-active-class="transition ease-out duration-200"
+                enter-from-class="opacity-0"
+                enter-to-class="opacity-100"
+                leave-active-class="transition ease-in duration-150"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0"
+            >
+                <div v-if="mobileMenuOpen" class="fixed inset-0 z-50 sm:hidden">
+                    <!-- Backdrop -->
+                    <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="mobileMenuOpen = false" />
+                    
+                    <!-- Panel -->
+                    <div class="fixed inset-y-0 right-0 w-full max-w-sm bg-white dark:bg-slate-900 shadow-2xl px-6 py-6 overflow-y-auto">
+                        <div class="flex items-center justify-between mb-8">
+                            <div class="flex items-center gap-2">
+                                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg">
+                                    <Zap class="h-5 w-5" />
+                                </div>
+                                <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">clientux</span>
+                            </div>
+                            <button
+                                type="button"
+                                class="-m-2.5 rounded-md p-2.5 text-slate-700 dark:text-slate-300"
+                                @click="mobileMenuOpen = false"
+                                aria-label="Fermer le menu"
+                            >
+                                <X class="h-6 w-6" />
+                            </button>
+                        </div>
+                        
+                        <div class="flow-root">
+                            <div class="space-y-3">
+                                <a href="#features" @click="mobileMenuOpen = false" class="block rounded-xl px-4 py-3 text-base font-semibold text-slate-900 hover:bg-slate-50 dark:text-white dark:hover:bg-slate-800 transition-colors">
+                                    {{ t('landing.features') }}
+                                </a>
+                                <a href="#faq" @click="mobileMenuOpen = false" class="block rounded-xl px-4 py-3 text-base font-semibold text-slate-900 hover:bg-slate-50 dark:text-white dark:hover:bg-slate-800 transition-colors">
+                                    {{ t('landing.faq') }}
+                                </a>
+                            </div>
+                            
+                            <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700 space-y-3">
+                                <Link
+                                    v-if="$page.props.auth.user"
+                                    :href="dashboard()"
+                                    class="block w-full rounded-xl bg-slate-900 px-4 py-3 text-center text-base font-semibold text-white shadow-sm hover:bg-slate-700 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 transition-colors"
+                                >
+                                    {{ t('landing.go_to_dashboard') }}
+                                </Link>
+                                <template v-else>
+                                    <Link
+                                        :href="login()"
+                                        class="block w-full rounded-xl px-4 py-3 text-center text-base font-semibold text-slate-900 hover:bg-slate-50 dark:text-white dark:hover:bg-slate-800 transition-colors"
+                                    >
+                                        {{ t('landing.login') }}
+                                    </Link>
+                                    <Link
+                                        v-if="canRegister"
+                                        :href="register()"
+                                        class="block w-full rounded-xl bg-indigo-600 px-4 py-3 text-center text-base font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
+                                    >
+                                        {{ t('landing.register') }}
+                                    </Link>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </transition>
         </nav>
 
         <!-- Hero Section -->
@@ -97,14 +186,14 @@ const toggleFaq = (index: number) => {
                     <div class="mx-auto max-w-2xl text-center">
                         <div class="mb-8 flex justify-center">
                             <span class="relative rounded-full px-3 py-1 text-sm leading-6 text-slate-600 ring-1 ring-slate-900/10 hover:ring-slate-900/20 dark:text-slate-300 dark:ring-white/10 dark:hover:ring-white/20">
-                                Nouveau: Factures, Mentions Légales & CRM Client <a href="#features" class="font-semibold text-indigo-600 dark:text-indigo-400"><span class="absolute inset-0" aria-hidden="true" />Découvrir <span aria-hidden="true">&rarr;</span></a>
+                                {{ t('landing.badge') }} <a href="#features" class="font-semibold text-indigo-600 dark:text-indigo-400"><span class="absolute inset-0" aria-hidden="true" />{{ t('landing.badge_cta') }} <span aria-hidden="true">&rarr;</span></a>
                             </span>
                         </div>
                         <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl dark:text-white">
-                            Le SaaS tout-en-un pour développer votre entreprise
+                            {{ t('landing.hero_title') }}
                         </h1>
                         <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">
-                            Capturez des prospects, gérez vos contacts dans notre mini-CRM, éditez des devis avec signature en ligne et générez vos factures professionnelles en quelques clics.
+                            {{ t('landing.hero_desc') }}
                         </p>
                         <div class="mt-10 flex items-center justify-center gap-x-6">
                             <Link
@@ -112,13 +201,13 @@ const toggleFaq = (index: number) => {
                                 :href="register()"
                                 class="rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-transform hover:-translate-y-1"
                             >
-                                Créer mon compte gratuit
+                                {{ t('landing.hero_cta') }}
                             </Link>
                             <Link v-else :href="dashboard()" class="rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-transform hover:-translate-y-1">
-                                App Dashboard
+                                {{ t('landing.hero_cta_dashboard') }}
                             </Link>
                             <a href="#features" class="text-sm font-semibold leading-6 text-slate-900 dark:text-white flex items-center gap-1 group">
-                                En savoir plus <ArrowRight class="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                {{ t('landing.hero_learn_more') }} <ArrowRight class="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                             </a>
                         </div>
                     </div>
@@ -147,7 +236,7 @@ const toggleFaq = (index: number) => {
                                         <div class="flex gap-4 overflow-hidden h-full">
                                             <!-- Column 1 -->
                                             <div class="flex-1 shrink-0 w-64 bg-slate-100/80 dark:bg-slate-800/50 rounded-lg p-3 flex flex-col gap-3 border border-slate-200 dark:border-slate-700/50">
-                                                <div class="font-medium text-sm px-1 text-slate-700 dark:text-slate-300">Nouveaux leads</div>
+                                                <div class="font-medium text-sm px-1 text-slate-700 dark:text-slate-300">{{ t('landing.mockup_col1') }}</div>
                                                 <div class="bg-white dark:bg-slate-800 p-3 rounded-md shadow-sm border border-slate-200 dark:border-slate-700">
                                                     <div class="h-4 w-1/2 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
                                                     <div class="h-3 w-1/3 bg-slate-100 dark:bg-slate-600 rounded"></div>
@@ -159,7 +248,7 @@ const toggleFaq = (index: number) => {
                                             </div>
                                             <!-- Column 2 -->
                                             <div class="flex-1 shrink-0 w-64 bg-slate-100/80 dark:bg-slate-800/50 rounded-lg p-3 flex flex-col gap-3 border border-slate-200 dark:border-slate-700/50">
-                                                <div class="font-medium text-sm px-1 text-slate-700 dark:text-slate-300">En cours</div>
+                                                <div class="font-medium text-sm px-1 text-slate-700 dark:text-slate-300">{{ t('landing.mockup_col2') }}</div>
                                                 <div class="bg-white dark:bg-slate-800 p-3 rounded-md shadow-sm border border-slate-200 dark:border-slate-700 border-l-2 border-l-amber-500">
                                                     <div class="h-4 w-3/4 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
                                                     <div class="h-3 w-1/2 bg-slate-100 dark:bg-slate-600 rounded"></div>
@@ -167,7 +256,7 @@ const toggleFaq = (index: number) => {
                                             </div>
                                             <!-- Column 3 -->
                                             <div class="flex-1 shrink-0 w-64 bg-slate-100/80 dark:bg-slate-800/50 rounded-lg p-3 flex flex-col gap-3 border border-slate-200 dark:border-slate-700/50">
-                                                <div class="font-medium text-sm px-1 text-slate-700 dark:text-slate-300">Converti</div>
+                                                <div class="font-medium text-sm px-1 text-slate-700 dark:text-slate-300">{{ t('landing.mockup_col3') }}</div>
                                                 <div class="bg-white dark:bg-slate-800 p-3 rounded-md shadow-sm border border-slate-200 dark:border-slate-700 border-l-2 border-l-emerald-500">
                                                     <div class="h-4 w-1/2 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
                                                     <div class="h-3 w-1/4 bg-slate-100 dark:bg-slate-600 rounded mb-3"></div>
@@ -195,12 +284,12 @@ const toggleFaq = (index: number) => {
         <div id="features" class="py-24 sm:py-32 bg-white dark:bg-slate-900/50">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
                 <div class="mx-auto max-w-2xl lg:text-center">
-                    <h2 class="text-base font-semibold leading-7 text-indigo-600 dark:text-indigo-400">Tout-en-un</h2>
+                    <h2 class="text-base font-semibold leading-7 text-indigo-600 dark:text-indigo-400">{{ t('landing.features_badge') }}</h2>
                     <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-                        L'outil complet pour les entreprises locales
+                        {{ t('landing.features_title') }}
                     </p>
                     <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">
-                        clientux réunit tous les outils dont vous avez besoin pour capturer des prospects, les convertir en clients, et gérer la facturation.
+                        {{ t('landing.features_desc') }}
                     </p>
                 </div>
                 
@@ -211,10 +300,10 @@ const toggleFaq = (index: number) => {
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
                                     <LayoutTemplate class="h-6 w-6 text-white" aria-hidden="true" />
                                 </div>
-                                Widget LeadGen
+                                {{ t('landing.feature_widget_title') }}
                             </dt>
                             <dd class="mt-4 flex flex-auto flex-col text-sm leading-7 text-slate-600 dark:text-slate-400">
-                                <p class="flex-auto">Créez des formulaires sur-mesure pour votre site web avec protection anti-spam invisible Honeypot intégrée.</p>
+                                <p class="flex-auto">{{ t('landing.feature_widget_desc') }}</p>
                             </dd>
                         </div>
                         <div class="flex flex-col">
@@ -222,10 +311,10 @@ const toggleFaq = (index: number) => {
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
                                     <Users class="h-6 w-6 text-white" aria-hidden="true" />
                                 </div>
-                                CRM Complet
+                                {{ t('landing.feature_crm_title') }}
                             </dt>
                             <dd class="mt-4 flex flex-auto flex-col text-sm leading-7 text-slate-600 dark:text-slate-400">
-                                <p class="flex-auto">Gérez opportunités et fiches clients. Ajoutez des notes, suivez la timeline d'activité (appels, emails, RDV) dans une interface ultra fluide.</p>
+                                <p class="flex-auto">{{ t('landing.feature_crm_desc') }}</p>
                             </dd>
                         </div>
                         <div class="flex flex-col">
@@ -233,10 +322,10 @@ const toggleFaq = (index: number) => {
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
                                     <Briefcase class="h-6 w-6 text-white" aria-hidden="true" />
                                 </div>
-                                Devis Visuels
+                                {{ t('landing.feature_quotes_title') }}
                             </dt>
                             <dd class="mt-4 flex flex-auto flex-col text-sm leading-7 text-slate-600 dark:text-slate-400">
-                                <p class="flex-auto">Générez des liens publics uniques pour vos devis. Vos clients peuvent accepter ou refuser l'offre en direct sans friction.</p>
+                                <p class="flex-auto">{{ t('landing.feature_quotes_desc') }}</p>
                             </dd>
                         </div>
                         <div class="flex flex-col">
@@ -244,10 +333,10 @@ const toggleFaq = (index: number) => {
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
                                     <Receipt class="h-6 w-6 text-white" aria-hidden="true" />
                                 </div>
-                                Facturation
+                                {{ t('landing.feature_invoices_title') }}
                             </dt>
                             <dd class="mt-4 flex flex-auto flex-col text-sm leading-7 text-slate-600 dark:text-slate-400">
-                                <p class="flex-auto">Éditez des factures multilingues avec rendu "Prêt à imprimer" intégrant vos taux de taxes personnalisés et toutes vos mentions légales dynamiques.</p>
+                                <p class="flex-auto">{{ t('landing.feature_invoices_desc') }}</p>
                             </dd>
                         </div>
                     </dl>
@@ -260,9 +349,9 @@ const toggleFaq = (index: number) => {
             <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
             <div class="mx-auto max-w-7xl px-6 lg:px-8 relative">
                 <div class="mx-auto max-w-2xl text-center">
-                    <h2 class="text-base font-semibold leading-7 text-indigo-600 dark:text-indigo-400">À qui s'adresse clientux ?</h2>
-                    <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">Conçu pour ceux qui font grandir leur activité</p>
-                    <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">Que vous soyez artisan, agence ou prestataire de services, clientux s'adapte à votre manière de travailler pour vous aider à convertir plus de prospects.</p>
+                    <h2 class="text-base font-semibold leading-7 text-indigo-600 dark:text-indigo-400">{{ t('landing.audience_badge') }}</h2>
+                    <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">{{ t('landing.audience_title') }}</p>
+                    <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">{{ t('landing.audience_desc') }}</p>
                 </div>
                 
                 <div class="mx-auto mt-16 max-w-7xl">
@@ -274,8 +363,8 @@ const toggleFaq = (index: number) => {
                                 <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                                     <Hammer class="w-7 h-7" />
                                 </div>
-                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Construction & Bâtiment</h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Plombiers, électriciens, menuisiers, paysagistes... Gérez vos demandes d'intervention et envoyez rapidement vos devis directement depuis votre camion.</p>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">{{ t('landing.audience_construction_title') }}</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{{ t('landing.audience_construction_desc') }}</p>
                             </div>
                         </div>
 
@@ -286,8 +375,8 @@ const toggleFaq = (index: number) => {
                                 <div class="w-14 h-14 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                                     <Heart class="w-7 h-7" />
                                 </div>
-                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Esthétique & Bien-être</h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Centres esthétiques, spas, massothérapeutes... Récupérez les informations de vos (futurs) clients en ligne et organisez vos rendez-vous.</p>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">{{ t('landing.audience_beauty_title') }}</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{{ t('landing.audience_beauty_desc') }}</p>
                             </div>
                         </div>
 
@@ -298,8 +387,8 @@ const toggleFaq = (index: number) => {
                                 <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                                     <Building2 class="w-7 h-7" />
                                 </div>
-                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Service B2B & Agences</h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Agences web, comptables, consultants... Captez des leads qualifiés via votre site, qualifiez-les, et éditez des factures professionnelles à votre image.</p>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">{{ t('landing.audience_b2b_title') }}</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{{ t('landing.audience_b2b_desc') }}</p>
                             </div>
                         </div>
 
@@ -310,8 +399,8 @@ const toggleFaq = (index: number) => {
                                 <div class="w-14 h-14 bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                                     <Home class="w-7 h-7" />
                                 </div>
-                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Services à domicile</h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Entretien ménager, garde d'enfants, dératisation, services d'aide... Transformez chaque visite de votre site web en une vraie demande d'intervention.</p>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">{{ t('landing.audience_home_title') }}</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{{ t('landing.audience_home_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -320,11 +409,11 @@ const toggleFaq = (index: number) => {
         </div>
 
         <!-- FAQ Section -->
-        <div class="bg-white py-24 sm:py-32 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800/50">
+        <div id="faq" class="bg-white py-24 sm:py-32 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800/50">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
                 <div class="mx-auto max-w-4xl divide-y divide-slate-900/10 dark:divide-white/10">
                     <h2 class="text-2xl font-bold leading-10 tracking-tight text-slate-900 dark:text-white mb-8">
-                        Questions fréquentes
+                        {{ t('landing.faq_title') }}
                     </h2>
                     <dl class="mt-10 space-y-6 divide-y divide-slate-900/10 dark:divide-white/10">
                         <div v-for="(faq, index) in faqs" :key="index" class="pt-6">
@@ -367,19 +456,19 @@ const toggleFaq = (index: number) => {
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-                            Prêt à optimiser vos ventes?
+                            {{ t('landing.cta_title1') }}
                             <br />
-                            <span class="text-indigo-600 dark:text-indigo-400">Commencez dès aujourd'hui.</span>
+                            <span class="text-indigo-600 dark:text-indigo-400">{{ t('landing.cta_title2') }}</span>
                         </h2>
                         <ul class="mt-6 flex flex-col gap-2">
                             <li class="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                                <CheckCircle2 class="h-5 w-5 text-emerald-500" /> Essai de 14 jours gratuits
+                                <CheckCircle2 class="h-5 w-5 text-emerald-500" /> {{ t('landing.cta_trial') }}
                             </li>
                             <li class="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                                <CheckCircle2 class="h-5 w-5 text-emerald-500" /> Pas de carte de crédit requise
+                                <CheckCircle2 class="h-5 w-5 text-emerald-500" /> {{ t('landing.cta_no_card') }}
                             </li>
                             <li class="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                                <CheckCircle2 class="h-5 w-5 text-emerald-500" /> Support client réactif
+                                <CheckCircle2 class="h-5 w-5 text-emerald-500" /> {{ t('landing.cta_support') }}
                             </li>
                         </ul>
                     </div>
@@ -388,10 +477,10 @@ const toggleFaq = (index: number) => {
                             :href="register()"
                             class="rounded-full bg-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-transform hover:-translate-y-1"
                         >
-                            Créer mon entreprise
+                            {{ t('landing.cta_button') }}
                         </Link>
                         <a href="#" class="text-base font-semibold leading-6 text-slate-900 dark:text-white">
-                            Voir les prix <span aria-hidden="true">→</span>
+                            {{ t('landing.cta_pricing') }} <span aria-hidden="true">→</span>
                         </a>
                     </div>
                 </div>
@@ -406,10 +495,10 @@ const toggleFaq = (index: number) => {
                     <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">clientux</span>
                 </div>
                 <p class="text-sm leading-5 text-slate-500 dark:text-slate-400">
-                    &copy; {{ new Date().getFullYear() }} clientux Inc. Tous droits réservés.
+                    &copy; {{ new Date().getFullYear() }} clientux Inc. {{ t('landing.footer_rights') }}
                 </p>
                 <div class="flex gap-4 mt-4 sm:mt-0 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer">
-                    Termes et conditions
+                    {{ t('landing.footer_terms') }}
                 </div>
             </div>
         </footer>
