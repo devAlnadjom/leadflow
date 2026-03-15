@@ -10,7 +10,7 @@ class EnsureSuperAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user() || ! $request->user()->isSuperAdmin()) {
+        if (!$request->user() || !$request->user()->isSuperAdmin() || !$request->user()->id === 1) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Accès refusé.'], 403);
             }
