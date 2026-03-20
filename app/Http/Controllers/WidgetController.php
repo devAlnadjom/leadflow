@@ -42,22 +42,84 @@ class WidgetController extends Controller
         values: {}
     };
 
+    var css = `
+        #clientux-widget-${uid} {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 2147483647;
+            width: 360px;
+            max-width: 92vw;
+            border: 1px solid #e2e8f0;
+            border-top: 5px solid #0f172a;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.16);
+            padding: 18px;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            box-sizing: border-box;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        #clientux-widget-${uid}.clientux-collapsed {
+            width: auto;
+            max-width: none;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+        #clientux-widget-${uid} * {
+            box-sizing: border-box;
+        }
+        @media screen and (max-width: 480px) {
+            #clientux-widget-${uid} {
+                right: 4vw;
+                left: 4vw;
+                width: auto;
+                max-width: 92vw;
+                bottom: 15px;
+            }
+            #clientux-widget-${uid}.clientux-collapsed {
+                left: auto;
+                right: 20px;
+            }
+        }
+        .clientux-btn {
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+        .clientux-btn:active {
+            filter: brightness(0.9);
+        }
+        .clientux-field-label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #334155;
+            font-weight: 500;
+        }
+        .clientux-input {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 16px; /* Prevents iOS zoom */
+            background: #fff;
+            color: #0f172a;
+            outline-color: #0f172a;
+        }
+        .clientux-textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+    `;
+
+    var styleTag = document.createElement('style');
+    styleTag.textContent = css;
+    document.head.appendChild(styleTag);
+
     var container = document.createElement('div');
     container.id = 'clientux-widget-' + uid;
-    container.style.position = 'fixed';
-    container.style.bottom = '20px';
-    container.style.right = '20px';
-    container.style.zIndex = '999999';
-    container.style.width = '360px';
-    container.style.maxWidth = '92vw';
-    container.style.border = '1px solid #e2e8f0';
-    // booreder top 5px solid #0f172a;
-    container.style.borderTop = '5px solid #0f172a';
-    container.style.borderRadius = '12px';
-    container.style.background = '#fff';
-    container.style.boxShadow = '0 12px 32px rgba(0,0,0,0.16)';
-    container.style.padding = '14px';
-    container.style.fontFamily = 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif';
     document.body.appendChild(container);
 
     function escapeHtml(value) {
@@ -72,14 +134,14 @@ class WidgetController extends Controller
     function fieldMarkup(field, index) {
         var requiredAttr = field.required ? 'required' : '';
         var key = escapeHtml(field.field_key);
-        var label = '<label style="display:block;font-size:13px;margin-bottom:6px;color:#334155;">'
+        var label = '<label class="clientux-field-label">'
             + escapeHtml(field.label)
             + (field.required ? ' *' : '')
             + '</label>';
 
         if (field.type === 'textarea') {
-            return '<div style="margin-bottom:10px;">' + label
-                + '<textarea name="' + key + '" ' + requiredAttr + ' placeholder="' + escapeHtml(field.placeholder || '') + '" style="width:100%;min-height:80px;border:1px solid #cbd5e1;border-radius:8px;padding:8px;font-size:14px;box-sizing:border-box;"></textarea>'
+            return '<div style="margin-bottom:12px;">' + label
+                + '<textarea name="' + key + '" ' + requiredAttr + ' class="clientux-input clientux-textarea" placeholder="' + escapeHtml(field.placeholder || '') + '"></textarea>'
                 + '</div>';
         }
 
@@ -88,8 +150,8 @@ class WidgetController extends Controller
                 return '<option value="' + escapeHtml(opt) + '">' + escapeHtml(opt) + '</option>';
             }).join('');
 
-            return '<div style="margin-bottom:10px;">' + label
-                + '<select name="' + key + '" ' + requiredAttr + ' style="width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:8px;font-size:14px;box-sizing:border-box;">'
+            return '<div style="margin-bottom:12px;">' + label
+                + '<select name="' + key + '" ' + requiredAttr + ' class="clientux-input">'
                 + '<option value="">Select...</option>'
                 + options
                 + '</select></div>';
@@ -99,13 +161,13 @@ class WidgetController extends Controller
             var groupName = key + (field.type === 'checkbox' ? '[]' : '');
             var groupOptions = (field.options || []).map(function (opt, optionIndex) {
                 var inputId = 'clientux-' + uid + '-' + index + '-' + optionIndex;
-                return '<label for="' + inputId + '" style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:6px;">'
-                    + '<input id="' + inputId + '" type="' + field.type + '" name="' + groupName + '" value="' + escapeHtml(opt) + '">'
+                return '<label for="' + inputId + '" style="display:flex;align-items:center;gap:10px;font-size:15px;margin-bottom:8px;cursor:pointer;">'
+                    + '<input id="' + inputId + '" type="' + field.type + '" name="' + groupName + '" value="' + escapeHtml(opt) + '" style="width:18px;height:18px;">'
                     + escapeHtml(opt)
                     + '</label>';
             }).join('');
 
-            return '<div style="margin-bottom:10px;">' + label + groupOptions + '</div>';
+            return '<div style="margin-bottom:12px;">' + label + groupOptions + '</div>';
         }
 
         var type = field.type === 'email' || field.type === 'tel' ? field.type : 'text';
@@ -121,8 +183,8 @@ class WidgetController extends Controller
             }
         }
 
-        return '<div style="margin-bottom:10px;">' + label
-            + '<input type="' + type + '" name="' + key + '" ' + requiredAttr + extraAttrs + ' placeholder="' + escapeHtml(field.placeholder || '') + '" style="width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:8px;font-size:14px;box-sizing:border-box;">'
+        return '<div style="margin-bottom:12px;">' + label
+            + '<input type="' + type + '" name="' + key + '" ' + requiredAttr + extraAttrs + ' placeholder="' + escapeHtml(field.placeholder || '') + '" class="clientux-input">'
             + '</div>';
     }
 
@@ -260,44 +322,55 @@ class WidgetController extends Controller
             }
 
             function render() {
-                var visibleFields = getVisibleFields();
-                var fieldsHtml = visibleFields.map(function (field) {
-                    var index = allFields.findIndex(function (candidate) {
-                        return candidate.field_key === field.field_key;
-                    });
-                    return fieldMarkup(field, index);
-                }).join('');
+                if (state.collapsed) {
+                    container.className = 'clientux-collapsed';
+                    container.innerHTML =
+                        '<div id="clientux-widget-toggle-' + uid + '" class="clientux-btn" style="width:56px;height:56px;border-radius:50%;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,0.2);">'
+                        + '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>'
+                        + '</div>';
+                } else {
+                    container.className = '';
+                    var visibleFields = getVisibleFields();
+                    var fieldsHtml = visibleFields.map(function (field) {
+                        var index = allFields.findIndex(function (candidate) {
+                            return candidate.field_key === field.field_key;
+                        });
+                        return fieldMarkup(field, index);
+                    }).join('');
 
-                var isLastStep = state.step >= allFields.length - 1;
-                var sliderNavigationHtml = '';
+                    var isLastStep = state.step >= allFields.length - 1;
+                    var sliderNavigationHtml = '';
 
-                if (layoutMode === 'slider' && allFields.length > 1) {
-                    sliderNavigationHtml =
-                        '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 10px;">'
-                        + '<button type="button" id="clientux-widget-prev-' + uid + '" style="background:#fff;border:1px solid #cbd5e1;color:#334155;border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;" ' + (state.step === 0 ? 'disabled' : '') + '>Previous</button>'
-                        + '<span style="font-size:12px;color:#64748b;">Step ' + (state.step + 1) + ' / ' + allFields.length + '</span>'
-                        + '<button type="button" id="clientux-widget-next-' + uid + '" style="background:#fff;border:1px solid #cbd5e1;color:#334155;border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;" ' + (isLastStep ? 'disabled' : '') + '>Next</button>'
+                    if (layoutMode === 'slider' && allFields.length > 1) {
+                        sliderNavigationHtml =
+                            '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 12px;">'
+                            + '<button type="button" id="clientux-widget-prev-' + uid + '" class="clientux-btn" style="background:#fff;border:1px solid #cbd5e1;color:#334155;border-radius:8px;padding:10px 14px;font-size:14px;" ' + (state.step === 0 ? 'disabled' : '') + '>Previous</button>'
+                            + '<span style="font-size:13px;color:#64748b;">Step ' + (state.step + 1) + ' / ' + allFields.length + '</span>'
+                            + '<button type="button" id="clientux-widget-next-' + uid + '" class="clientux-btn" style="background:#fff;border:1px solid #cbd5e1;color:#334155;border-radius:8px;padding:10px 14px;font-size:14px;" ' + (isLastStep ? 'disabled' : '') + '>Next</button>'
+                            + '</div>';
+                    }
+
+                    container.innerHTML =
+                        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #f1f5f9;">'
+                        + '<div style="font-size:16px;font-weight:700;color:#0f172a;">' + title + '</div>'
+                        + '<button type="button" id="clientux-widget-toggle-' + uid + '" class="clientux-btn" style="background:transparent;border:0;color:#64748b;padding:4px;display:flex;">'
+                        + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+                        + '</button>'
+                        + '</div>'
+                        + '<div id="clientux-widget-body-' + uid + '">'
+                        + (allFields.length === 0
+                            ? '<p style="margin:8px 0 0;color:#64748b;font-size:14px;">No fields configured.</p>'
+                            : '<form id="clientux-widget-form-' + uid + '">'
+                            + '<div style="position:absolute;left:-9999px;top:-9999px;"><label for="clientux-hp-' + uid + '">Leave this field empty</label><input type="text" id="clientux-hp-' + uid + '" name="_website_url_hp" tabindex="-1" autocomplete="new-password"></div>'
+                            + fieldsHtml
+                            + sliderNavigationHtml
+                            + ((layoutMode === 'stack' || isLastStep)
+                                ? '<button type="submit" class="clientux-btn" style="width:100%;background:#0f172a;color:#fff;border:0;border-radius:8px;padding:12px;font-size:15px;font-weight:600;">' + buttonLabel + '</button>'
+                                : '')
+                            + '<p id="clientux-widget-msg-' + uid + '" style="display:none;margin-top:12px;font-size:14px;text-align:center;"></p>'
+                            + '</form>')
                         + '</div>';
                 }
-
-                container.innerHTML =
-                    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
-                    + '<div style="font-size:16px;font-weight:600;">' + title + '</div>'
-                    + '<button type="button" id="clientux-widget-toggle-' + uid + '" style="background:#fff;border:1px solid #cbd5e1;border-radius:999px;width:30px;height:30px;cursor:pointer;">' + (state.collapsed ? '+' : '-') + '</button>'
-                    + '</div>'
-                    + '<div id="clientux-widget-body-' + uid + '" style="' + (state.collapsed ? 'display:none;' : '') + '">'
-                    + (allFields.length === 0
-                        ? '<p style="margin:8px 0 0;color:#64748b;font-size:13px;">No fields configured for this widget.</p>'
-                        : '<form id="clientux-widget-form-' + uid + '">'
-                        + '<div style="position:absolute;left:-9999px;top:-9999px;"><label for="clientux-hp-' + uid + '">Leave this field empty</label><input type="text" id="clientux-hp-' + uid + '" name="_website_url_hp" tabindex="-1" autocomplete="new-password"></div>'
-                        + fieldsHtml
-                        + sliderNavigationHtml
-                        + ((layoutMode === 'stack' || isLastStep)
-                            ? '<button type="submit" style="width:100%;background:#0f172a;color:#fff;border:0;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;">' + buttonLabel + '</button>'
-                            : '')
-                        + '<p id="clientux-widget-msg-' + uid + '" style="display:none;margin-top:10px;font-size:13px;"></p>'
-                        + '</form>')
-                    + '</div>';
 
                 var toggle = document.getElementById('clientux-widget-toggle-' + uid);
                 if (toggle) {
@@ -331,7 +404,7 @@ class WidgetController extends Controller
                         var currentValue = currentField ? state.values[currentField.field_key] : null;
 
                         if (currentField && !isRequiredFieldFilled(currentField, currentValue)) {
-                            showMessage('Please fill this required field before continuing.', true);
+                            showMessage('Please fill this required field.', true);
                             return;
                         }
 
@@ -369,11 +442,14 @@ class WidgetController extends Controller
                             state.values = {};
                             if (layoutMode === 'slider') {
                                 state.step = 0;
-                                render();
                             } else {
                                 form.reset();
                             }
                             showMessage('Submission sent successfully.', false);
+                            setTimeout(function() {
+                                state.collapsed = true;
+                                render();
+                            }, 2000);
                         })
                         .catch(function (error) {
                             showMessage(error.message || 'Submission failed.', true);
@@ -387,6 +463,7 @@ class WidgetController extends Controller
             // Silent fail on host pages.
         });
 })();
+
 JS;
 
         return response($script, 200, ['Content-Type' => 'application/javascript']);
