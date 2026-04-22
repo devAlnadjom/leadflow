@@ -39,6 +39,15 @@ Route::post('devis/{uid}/respond', [\App\Http\Controllers\PublicQuoteController:
 // Public invoice view (no auth required)
 Route::get('facture/{uid}', [\App\Http\Controllers\PublicInvoiceController::class, 'show'])->name('invoices.public.show');
 
+// Public directory
+Route::get('annuaire', [\App\Http\Controllers\Public\DirectoryController::class, 'index'])->name('public.directory.index');
+
+// Public company landing page
+Route::get('c/{slug}', [\App\Http\Controllers\Public\PublicCompanyController::class, 'show'])->name('public.company.show');
+Route::post('c/{slug}/contact', [\App\Http\Controllers\Public\PublicCompanyController::class, 'submitContact'])
+    ->middleware('throttle:10,1')
+    ->name('public.company.contact');
+
 Route::middleware(['auth', 'verified', 'user.active'])->group(function () {
     Route::get('onboarding/company', [OnboardingController::class, 'create'])->name('onboarding.company.create');
     Route::post('onboarding/company', [OnboardingController::class, 'store'])->name('onboarding.company.store');

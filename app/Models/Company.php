@@ -6,10 +6,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 class Company extends Model
 {
     use HasFactory;
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($company) {
+            if (!$company->slug) {
+                $company->slug = Str::slug($company->name) . '-' . Str::random(5);
+            }
+        });
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -29,6 +41,7 @@ class Company extends Model
         'primary_color',
         'secondary_color',
         'is_active',
+        'slug',
     ];
 
     /**
@@ -89,5 +102,21 @@ class Company extends Model
     public function clients(): HasMany
     {
         return $this->hasMany(Client::class);
+    }
+
+    /**
+     * Get all services for this company.
+     */
+    public function services(): HasMany
+    {
+        return $this->hasMany(CompanyService::class);
+    }
+
+    /**
+     * Get all galleries for this company.
+     */
+    public function galleries(): HasMany
+    {
+        return $this->hasMany(CompanyGallery::class);
     }
 }

@@ -12,6 +12,7 @@ import { edit as editCompanySettings } from '@/routes/company-settings';
 import { edit as editProfile } from '@/routes/profile';
 import { show } from '@/routes/two-factor';
 import { edit as editPassword } from '@/routes/user-password';
+import { edit as editSeoSettings } from '@/routes/seo-settings';
 import type { NavItem } from '@/types';
 
 const { t } = useI18n();
@@ -32,6 +33,10 @@ const sidebarNavItems = computed<NavItem[]>(() => [
     {
         title: t('settings.company'),
         href: editCompanySettings(),
+    },
+    {
+        title: t('settings.seo'),
+        href: editSeoSettings(),
     },
     {
         title: t('settings.appearance'),

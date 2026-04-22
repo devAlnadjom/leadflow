@@ -26,6 +26,11 @@ class CompanySetting extends Model
         'currency',
         'terms_and_conditions',
         'legal_mentions',
+        'facebook_url',
+        'instagram_url',
+        'seo_title',
+        'seo_description',
+        'seo_keywords',
     ];
 
     protected $casts = [
